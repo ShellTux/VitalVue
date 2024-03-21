@@ -1,7 +1,7 @@
 # VitalVue
 
 ---
-title: BD Report
+title: Relatório Base de dados
 author:
   - Luís Pedro de Sousa Oliveira Góis, nº 2018280716
   - Marco Manuel Almeida e Silva, nº 2021211653
@@ -22,9 +22,47 @@ schema details that are not explicitly defined should be determined.
 
 ## Definition
 
-### Transaction
+### Transaction / Potential concurrency conflicts
 
-### Potential concurrency conflicts
+- When making an appointment or a surgery, there is a scheduled date. It is
+  necessary to check if there is an available slot to make a schedule. That
+  verification goes beyond what is defined in the diagram and needs to fail if a
+  slot is not available.
+- Once we add a surgery to a hospitalization, we must create a bill for the
+  hospitalization if it has not been created yet or update the hospitalization
+  bill, adding the cost of the surgery to the bill.
+- When adding a new surgery to the hospitalization, we must make sure there is
+  not a surgery already added to the same date and time block.
+- When scheduling an appointment for the patient, there cannot be an appointment
+  already scheduled in the same date and time block.
+
+## Development plan
+
+### Planned Tasks
+
+1. Database design and implementation: Define the database schema and set up the
+   necessary tables.
+2. Backend development: Write the necessary Python code to handle operations for
+   the database, and create RESTful endpoints for communication with the frontend.
+3. API testing using Postman: Test the RESTful endpoints to ensure they are
+   accessible and return the expected results.
+4. Documentation: Prepare documentation for installation, usage, and maintenance
+   of the system for future reference.
+
+### Initial Work Division per Team Member
+
+1. Database design and implementation
+2. Backend development
+3. API testing using Postman
+4. Documentation
+
+### Timeline
+
+1. Database design and implementation: Weeks 1-2
+2. Backend development: Weeks 3-6
+3. API testing using Postman and Documentation: Weeks 7-8
+
+By following this updated development plan, each team member will be responsible for their assigned tasks to ensure timely delivery of the project. Regular meetings and status updates will be conducted to track progress and address any issues that may arise during the development process.
 
 ## ER Diagram
 
@@ -33,5 +71,3 @@ schema details that are not explicitly defined should be determined.
 ## Relational data model
 
 ![Relational Data Model](/assets/physical-diagram.png)
-
-## Development plan
