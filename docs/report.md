@@ -62,8 +62,6 @@ schema details that are not explicitly defined should be determined.
 2. Backend development: Weeks 3-6
 3. API testing using Postman and Documentation: Weeks 7-8
 
-By following this updated development plan, each team member will be responsible for their assigned tasks to ensure timely delivery of the project. Regular meetings and status updates will be conducted to track progress and address any issues that may arise during the development process.
-
 ## ER Diagram
 
 ![ER Diagram](/assets/conceptual-diagram.png)
@@ -71,3 +69,8 @@ By following this updated development plan, each team member will be responsible
 ## Relational data model
 
 ![Relational Data Model](/assets/physical-diagram.png)
+
+## Attachments
+
+The onda project saved as json are saved under the assets directory, among all
+the figures as well.
