@@ -1,6 +1,9 @@
 BUILD_DIR = build
 
-relatorio.pdf: $(BUILD_DIR)/docs/report.md
+ARCHIVE = BD-PL9-JoãoAlves-LuísGóis-MarcoSilva.zip
+REPORT = relatorio.pdf
+
+$(REPORT): $(BUILD_DIR)/docs/report.md
 	pandoc --output=$@ $<
 
 $(BUILD_DIR)/%.md: %.md
@@ -9,10 +12,10 @@ $(BUILD_DIR)/%.md: %.md
 	sed -i 's|/assets|assets|g' $@
 
 .PHONY: archive
-archive: BD-PL9-JoãoAlves-LuísGóis-MarcoSilva.zip
+archive: $(ARCHIVE)
 
-BD-PL9-JoãoAlves-LuísGóis-MarcoSilva.zip: relatorio.pdf
+$(ARCHIVE): $(REPORT)
 	git archive --output=$@ --add-file=$< HEAD
 
 clean:
-	rm -rf $(BUILD_DIR) relatorio.pdf
+	rm -rf $(BUILD_DIR) $(REPORT) $(ARCHIVE)
