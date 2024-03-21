@@ -28,8 +28,10 @@ schema details that are not explicitly defined should be determined.
 
 ## ER Diagram
 
-![ER Diagram](/assets/er-diagram.png)
+![ER Diagram](/assets/conceptual-diagram.png)
 
 ## Relational data model
+
+![Relational Data Model](/assets/physical-diagram.png)
 
 ## Development plan
