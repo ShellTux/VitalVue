@@ -24,10 +24,11 @@ schema details that are not explicitly defined should be determined.
 
 ### Transaction / Potential concurrency conflicts
 
-- When making an appointment or a surgery, there is a scheduled date. It is
-  necessary to check if there is an available slot to make a schedule. That
-  verification goes beyond what is defined in the diagram and needs to fail if a
-  slot is not available.
+- When creating an appointment or surgery, we need to verify that the doctor and
+  the nurses assigned are available in the date and time of the
+  appointment/surgery.  For that we have to verify that there isn't an
+  appointment/surgery with the same doctors and nurses already created in the
+  same time block.
 - Once we add a surgery to a hospitalization, we must create a bill for the
   hospitalization if it has not been created yet or update the hospitalization
   bill, adding the cost of the surgery to the bill.
