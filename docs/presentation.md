@@ -64,13 +64,16 @@ main()
 ---
 
 # Slide 6: Quotes
+
 > "Be yourself; everyone else is already taken." - Oscar Wilde
 
 ---
 
 # Slide 7: Emphasis
+
 - *italic text*
 - **bold text**
+- ~~crossed text~~
 
 ---
 
@@ -89,7 +92,57 @@ This is an example of a math equation slide using LaTeX syntax.
 
 ---
 
-# Slide 10: Conclusion
+# Slide 10: Incremental Slide
+
+::: incremental
+
+- Item 1
+- Item 2
+- Item 3
+
+:::
+
+---
+
+# Slide 11: Slide with a pause
+
+content before the pause
+
+. . .
+
+content after the pause
+
+---
+
+# Slide 12: Slide with notes and columns
+
+::: notes
+
+This is my note.
+
+- It can contain Markdown
+- like this list
+
+:::
+
+:::::::::::::: {.columns}
+::: {.column width="40%"}
+foo | bar
+--- | ---
+1   | 2
+3   | 4
+:::
+::: {.column width="60%"}
+foo | bar
+--- | ---
+6   | -5
+-4  | 13
+:::
+::::::::::::::
+
+---
+
+# Slide 13: Conclusion
 - Summarize key points
 - Thank the audience for their time
 
