@@ -3,7 +3,7 @@ BUILD_DIR = build
 ARCHIVE      = BD-PL9-JoãoAlves-LuísGóis-MarcoSilva.zip
 REPORT       = relatorio.pdf
 PRESENTATION = presentation.pdf
-PANDOC_OPTS  = --highlight-style=assets/onehalfdark.theme
+PANDOC_OPTS  = --variable=theme:Warsaw --highlight-style=assets/onehalfdark.theme
 
 $(REPORT): $(BUILD_DIR)/docs/report.md
 	pandoc $(PANDOC_OPTS) --output=$@ $<
