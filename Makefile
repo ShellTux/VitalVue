@@ -3,12 +3,13 @@ BUILD_DIR = build
 ARCHIVE      = BD-PL9-JoãoAlves-LuísGóis-MarcoSilva.zip
 REPORT       = relatorio.pdf
 PRESENTATION = presentation.pdf
+PANDOC_OPTS  = --highlight-style=assets/onehalfdark.theme
 
 $(REPORT): $(BUILD_DIR)/docs/report.md
-	pandoc --output=$@ $<
+	pandoc $(PANDOC_OPTS) --output=$@ $<
 
 $(PRESENTATION): %.pdf: $(BUILD_DIR)/docs/%.md
-	pandoc --output=$@ --to=beamer $<
+	pandoc $(PANDOC_OPTS) --output=$@ --to=beamer $<
 
 $(BUILD_DIR)/%.md: %.md
 	mkdir --parents $(shell dirname $@)

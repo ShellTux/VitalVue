@@ -1,0 +1,101 @@
+{
+    "text-color": "#abb2bf",
+    "background-color": "#282c34",
+    "line-number-color": "#5c6370",
+    "line-number-background-color": "#282c34",
+    "text-styles": {
+        "Alert": {
+            "text-color": "#e06c75"
+        },
+        "Annotation": {
+            "text-color": "#61afef",
+            "bold": false,
+            "italic": true
+        },
+        "Attribute": {
+            "text-color": "#98c379"
+        },
+        "BaseN": {
+            "text-color": "#d19a66"
+        },
+        "BuiltIn": {
+            "text-color": "#e6c07b"
+        },
+        "Char": {
+            "text-color": "#56b6c2"
+        },
+        "Comment": {
+            "text-color": "#5c6370",
+            "italic": true
+        },
+        "Constant": {
+            "text-color": "#d19a66"
+        },
+        "ControlFlow": {
+            "text-color": "#56b6c2",
+            "bold": true
+        },
+        "DataType": {
+            "text-color": "#61afef"
+        },
+        "DecVal": {
+            "text-color": "#d19a66"
+        },
+        "Documentation": {
+            "text-color": "#c678dd",
+            "italic": true
+        },
+        "Error": {
+            "text-color": "#e06c75",
+            "bold": true
+        },
+        "Float": {
+            "text-color": "#d19a66"
+        },
+        "Function": {
+            "text-color": "#61afef"
+        },
+        "Import": {
+            "text-color": "#98c379",
+            "bold": true
+        },
+        "Information": {
+            "text-color": "#61afef",
+            "bold": true,
+            "italic": true
+        },
+        "Keyword": {
+            "text-color": "#c678dd",
+            "bold": true
+        },
+        "Operator": {
+            "text-color": "#abb2bf"
+        },
+        "Other": {
+            "text-color": "#56b6c2"
+        },
+        "Preprocessor": {
+            "text-color": "#e5c07b"
+        },
+        "SpecialChar": {
+            "text-color": "#56b6c2"
+        },
+        "SpecialString": {
+            "text-color": "#c678dd"
+        },
+        "String": {
+            "text-color": "#98c379"
+        },
+        "Variable": {
+            "text-color": "#61afef"
+        },
+        "VerbatimString": {
+            "text-color": "#98c379"
+        },
+        "Warning": {
+            "text-color": "#61afef",
+            "bold": true,
+            "italic": true
+        }
+    }
+}
