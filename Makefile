@@ -14,6 +14,7 @@ $(PRESENTATION): %.pdf: $(BUILD_DIR)/docs/%.md
 $(BUILD_DIR)/%.md: %.md
 	mkdir --parents $(shell dirname $@)
 	cp $< $@
+	sed -i 's|date: date|date: '$(shell date +'%d/%m/%Y')'|' $@
 	sed -i 's|/assets|assets|g' $@
 
 .PHONY: archive
