@@ -19,8 +19,8 @@ $(BUILD_DIR)/%.md: %.md
 .PHONY: archive
 archive: $(ARCHIVE)
 
-$(ARCHIVE): $(REPORT)
-	git archive --output=$@ --add-file=$< HEAD
+$(ARCHIVE): $(REPORT) $(PRESENTATION)
+	git archive --output=$@ $(^:%=--add-file=%) HEAD
 
 clean:
 	rm -rf $(BUILD_DIR) $(REPORT) $(ARCHIVE)
