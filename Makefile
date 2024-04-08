@@ -5,7 +5,7 @@ REPORT       = relatorio.pdf
 PRESENTATION = presentation.pdf
 PANDOC_OPTS  = --variable=theme:Warsaw --highlight-style=assets/onehalfdark.theme
 
-$(REPORT): $(BUILD_DIR)/docs/report.md
+%.pdf: $(BUILD_DIR)/%.md
 	pandoc $(PANDOC_OPTS) --output=$@ $<
 
 $(PRESENTATION): %.pdf: $(BUILD_DIR)/docs/%.md
