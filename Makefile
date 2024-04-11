@@ -44,3 +44,7 @@ pre-commit: venv
 clean:
 	rm -rf $(VENV) $(BUILD_DIR) $(REPORT) $(ARCHIVE)
 	find . -type f -name '*.pyc' -delete
+
+run:
+	(sleep 1 && xdg-open "http://127.0.0.1:8080") &
+	$(PYTHON) ./src/app.py
