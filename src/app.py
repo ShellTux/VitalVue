@@ -23,10 +23,9 @@
 #
 ################################################################################
 
-from os import name
+from dotenv import dotenv_values
 from flask import Flask
 import logging
-from load_env import ENV
 import psycopg2
 
 from enum import Enum
@@ -36,15 +35,16 @@ class StatusCode(Enum):
     API_ERROR      = 400
     INTERNAL_ERROR = 500
 
+CONFIG = dotenv_values('.env')
 app = Flask(__name__)
 
 def connect_db(
         *,
-        user: str = ENV['USER'],
-        password: str = ENV['PASSWORD'],
-        host: str = ENV['SERVER_HOST'],
-        port: str = ENV['SERVER_PORT'],
-        database: str = ENV['DATABASE']
+        user: str | None     = CONFIG.get('USER'),
+        password: str | None = CONFIG.get('PASSWORD'),
+        host: str | None     = CONFIG.get('SERVER_HOST'),
+        port: str | None     = CONFIG.get('SERVER_PORT'),
+        database: str | None = CONFIG.get('DATABASE')
         ):
     return psycopg2.connect(
             user=user,
@@ -78,13 +78,15 @@ def main():
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
+    port = 5000 if CONFIG['SERVER_PORT'] is None else int(CONFIG['SERVER_PORT'])
+    url = f'http://{CONFIG.get("SERVER_HOST")}:{port}/'
     app.run(
-            host=ENV['SERVER_HOST'],
+            host=CONFIG.get('SERVER_HOST'),
             debug=True,
             threaded=True,
-            port=int(ENV['SERVER_PORT'])
+            port=port
             )
-    logger.info(f"API v1.0 online: http://{ENV['SERVER_HOST']}:{ENV['SERVER_PORT']}")
+    logger.info(f"API v1.0 online: {url}")
 
 if __name__ == "__main__":
     main()
