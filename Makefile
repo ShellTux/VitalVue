@@ -2,10 +2,12 @@ BUILD_DIR = build
 
 ARCHIVE             = BD-PL9-JoãoAlves-LuísGóis-MarcoSilva.zip
 INSTALLATION_MANUAL = installation-manual.pdf
-PANDOC_OPTS         = --variable=theme:Warsaw --highlight-style=assets/onehalfdark.theme
 PRESENTATION        = presentation.pdf
 REPORT              = relatorio.pdf
 USER_MANUAL         = user-manual.pdf
+PANDOC_OPTS         = \
+		      --variable=theme:Warsaw \
+		      --highlight-style=assets/onehalfdark.theme
 
 VENV        = venv
 PYTHON     := ./$(VENV)/bin/python3
