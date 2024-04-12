@@ -14,16 +14,12 @@ PRE_COMMIT := ./$(VENV)/bin/pre-commit
 
 all: venv $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL) $(PRESENTATION)
 
-$(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL): %.pdf: $(BUILD_DIR)/docs/%.md
-	pandoc --output=$@ $<
+$(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL): %.pdf: docs/%.md
+	sed 's|/assets|assets|g' $< | pandoc --output=$@ --from=markdown
 
-$(PRESENTATION): %.pdf: $(BUILD_DIR)/docs/%.md
-	pandoc $(PANDOC_OPTS) --output=$@ --to=beamer $<
-
-$(BUILD_DIR)/%.md: %.md
-	mkdir --parents $(shell dirname $@)
-	cp $< $@
-	sed -i 's|/assets|assets|g' $@
+$(PRESENTATION): %.pdf: docs/%.md
+	sed 's|/assets|assets|g' $< \
+		| pandoc $(PANDOC_OPTS) --output=$@ --from=markdown --to=beamer
 
 .PHONY: archive
 archive: $(ARCHIVE)
