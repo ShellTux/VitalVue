@@ -40,7 +40,11 @@ pre-commit: venv
 	$(PRE_COMMIT) install
 
 clean:
-	rm -rf $(VENV) $(BUILD_DIR) $(REPORT) $(ARCHIVE)
+	rm -rf \
+		$(VENV) \
+		$(BUILD_DIR) \
+		$(ARCHIVE) \
+		$(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL) $(PRESENTATION)
 	find . -type f -name '*.pyc' -delete
 
 run: $(VENV)
