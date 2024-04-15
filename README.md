@@ -69,7 +69,12 @@ develop the database schema should be explicitly defined.
 
 ## Installation
 
+To know how to install this project see the [Installation
+Manual](/docs/installation-manual.md).
+
 ## How to Use
+
+To check how to use this project see the [User Manual](/docs/user-manual.md)
 
 ## Contributing
 
