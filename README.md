@@ -60,6 +60,51 @@ specialization), allowing for detailed categorization of medical expertise.
 Any details that are not specifically defined but that you feel are necessary to
 develop the database schema should be explicitly defined.
 
+## Setup
+
+### Development Map
+
+Git workflow example of this git repo:
+
+```mermaid
+gitGraph LR:
+    commit
+    branch develop
+    commit
+    branch feat/add-api-endpoint
+    commit
+    checkout develop
+    branch docs/installation-manual-docker
+    commit
+    checkout feat/add-api-endpoint
+    commit
+    checkout develop
+    merge feat/add-api-endpoint id: "feat(api): add api endpoint"
+    checkout docs/installation-manual-docker
+    commit
+    checkout develop
+    merge docs/installation-manual-docker id:"docs(installation-manual.md): add
+    docker setup section"
+    branch feat/cli
+    commit
+    commit
+    commit
+    branch fix/sql-injection
+    commit
+    checkout feat/cli
+    merge fix/sql-injection id: "fix(src/app.py): remove sql injection vulnerability"
+    checkout develop
+    merge feat/cli id:"feat(src/app.py): add cli interface"
+    checkout main
+    merge develop tag:"v1.0"
+```
+
+### Python Virtual environment
+
+```sh
+make venv
+```
+
 ## Features
 
 ## Technologies Used
