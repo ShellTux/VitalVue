@@ -14,7 +14,7 @@ PYTHON     := ./$(VENV)/bin/python3
 PIP        := ./$(VENV)/bin/pip
 PRE_COMMIT := ./$(VENV)/bin/pre-commit
 
-all: venv $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL) $(PRESENTATION)
+all: $(VENV) $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL) $(PRESENTATION)
 
 $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL): %.pdf: docs/%.md
 	sed 's|/assets|assets|g' $< | pandoc --output=$@ --from=markdown
@@ -33,10 +33,10 @@ $(VENV)/bin/activate: requirements.txt
 	python3 -m venv $(VENV)
 	$(PIP) install --requirement requirements.txt
 
-.PHONY: venv
-venv: $(VENV)/bin/activate
+.PHONY: $(VENV)
+$(VENV): $(VENV)/bin/activate
 
-pre-commit: venv
+pre-commit: $(VENV)
 	$(PRE_COMMIT) install
 
 clean:
