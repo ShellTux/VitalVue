@@ -67,7 +67,7 @@ develop the database schema should be explicitly defined.
 Git workflow example of this git repo:
 
 ```mermaid
-gitGraph LR:
+gitGraph TB:
     commit
     branch develop
     commit
