@@ -35,7 +35,11 @@ class StatusCode(Enum):
     API_ERROR = 400
     INTERNAL_ERROR = 500
 
-IndividualTypes = ["patient", "assistant", "nurse", "doctor"]
+class IndividualTypes(Enum):
+    PATIENT = 'patient'
+    ASSISTANT = 'assistant'
+    NURSE = 'nurse'
+    DOCTOR = 'doctor'
 
 CONFIG = dotenv_values('.env')
 app = Flask(__name__)
@@ -86,7 +90,7 @@ def register(registration_type):
     #logger.info('POST /register/<registration_type>')
     payload = request.get_json()
 
-    if registration_type in IndividualTypes:
+    if registration_type in tuple(individual.value for individual in IndividualTypes):
         response = { 'status': StatusCode.SUCCESS.value }
 
         #conn = connect_db()
