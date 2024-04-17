@@ -4,14 +4,15 @@ services:
     restart: always
     # set shared memory limit when using docker-compose
     shm_size: 128mb
+    env_file:
+      - .env
     ports:
       - 5432:5432
 
   pgadmin:
     image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    env_file:
+      - .env
     user: '$UID:$GID'
     ports:
       - 5050:80
