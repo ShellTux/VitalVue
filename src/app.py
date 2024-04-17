@@ -24,16 +24,19 @@
 ################################################################################
 
 from dotenv import dotenv_values
-from flask import Flask
+from flask import Flask, request, jsonify
 import logging
 import psycopg2
 
 from enum import Enum
 
-class StatusCode(Enum):
-    SUCCESS        = 200
-    API_ERROR      = 400
-    INTERNAL_ERROR = 500
+StatusCode = {
+    'success': 200,
+    'api_error': 400,
+    'internal_error': 500
+}
+
+IndividualTypes = ["patient", "assistant", "nurse", "doctor"]
 
 CONFIG = dotenv_values('.env')
 app = Flask(__name__)
@@ -43,7 +46,7 @@ def connect_db(
         user: str | None     = CONFIG.get('USER'),
         password: str | None = CONFIG.get('PASSWORD'),
         host: str | None     = CONFIG.get('SERVER_HOST'),
-        port: str | None     = CONFIG.get('SERVER_PORT'),
+        port: str | None     = CONFIG.get('DATABASE_PORT'),
         database: str | None = CONFIG.get('DATABASE')
         ):
     return psycopg2.connect(
@@ -53,6 +56,11 @@ def connect_db(
             port=str(port),
             database=database
             )
+
+
+################################################################################
+## LANDING PAGE
+################################################################################
 
 @app.route('/')
 def landing_page():
@@ -64,6 +72,51 @@ def landing_page():
     BD 2023-2024 Team<br/>
     <br/>
     """
+
+################################################################################
+## REGISTER NEW INDIVIDUAL
+##
+## Registers a new individual taking the individual type into consideration
+##
+## How to use in curl:
+## > curl -X POST http://localhost:5433/register/patient - H 'Content-Type: application/json' - d ''
+################################################################################
+
+@app.route('/register/<registration_type>', methods=['POST'])
+def register(registration_type):
+    #logger.info('POST /register/<registration_type>')
+    payload = request.get_json()
+
+    if registration_type in IndividualTypes:
+        response = {'status': StatusCode['success']}
+
+        #conn = connect_db()
+        #cursor = conn.cursor
+        #conn.close()
+    else:
+        response = {'status': StatusCode['api_error'], 'error': 'Invalid registration type'}
+
+    return jsonify(response)
+
+################################################################################
+## USER AUTHENTICATION
+## Login using the username and password. In case of success, the returning
+## token will be included in the header of the remaining requests.
+##
+## How to use in curl:
+## > curl -X PUT http://localhost:8080/user -H 'Content-Type: application/json -d
+##   {"username": username, "password": password}
+################################################################################
+
+@app.route('/user', methods=['PUT'])
+def user_authentication():
+    payload = request.get_json()
+
+    response = {'status': StatusCode['success']}
+
+    return jsonify(response)
+
+################################################################################
 
 def main():
     # set up logging
@@ -78,7 +131,7 @@ def main():
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    port = 5000 if CONFIG['SERVER_PORT'] is None else int(CONFIG['SERVER_PORT'])
+    port = 8080 if CONFIG['SERVER_PORT'] is None else int(CONFIG['SERVER_PORT'])
     url = f'http://{CONFIG.get("SERVER_HOST")}:{port}/'
     app.run(
             host=CONFIG.get('SERVER_HOST'),
