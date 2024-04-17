@@ -30,11 +30,10 @@ import psycopg2
 
 from enum import Enum
 
-StatusCode = {
-    'success': 200,
-    'api_error': 400,
-    'internal_error': 500
-}
+class StatusCode(Enum):
+    SUCCESS = 200
+    API_ERROR = 400
+    INTERNAL_ERROR = 500
 
 IndividualTypes = ["patient", "assistant", "nurse", "doctor"]
 
@@ -88,13 +87,13 @@ def register(registration_type):
     payload = request.get_json()
 
     if registration_type in IndividualTypes:
-        response = {'status': StatusCode['success']}
+        response = { 'status': StatusCode.SUCCESS.value }
 
         #conn = connect_db()
         #cursor = conn.cursor
         #conn.close()
     else:
-        response = {'status': StatusCode['api_error'], 'error': 'Invalid registration type'}
+        response = {'status': StatusCode.API_ERROR.value, 'error': 'Invalid registration type'}
 
     return jsonify(response)
 
@@ -112,7 +111,7 @@ def register(registration_type):
 def user_authentication():
     payload = request.get_json()
 
-    response = {'status': StatusCode['success']}
+    response = {'status': StatusCode.SUCCESS.value}
 
     return jsonify(response)
 
