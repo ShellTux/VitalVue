@@ -70,6 +70,29 @@ Never commit directly to the `main` or the `develop` branch. Instead branch from
 `develop` and implement your feature there, when you are done submit a pull
 request to `develop` branch.
 
+Example:
+
+```sh
+# Make sure to create a feature branch from develop branch
+git switch develop
+git switch --create feat/new-line-file
+
+# Push your commits to that new branch
+echo add new line | tee --append file.txt
+git add file.txt
+git commit -m 'feat(file.txt): new line added'
+# You can add more commits
+git push -u origin feat/new-line-file
+
+# Submit a pull request on the web through github
+# After a sucessful merge
+git switch develop
+git pull
+
+# Optional: Delete your feature branch
+git branch --delete feat/new-line-file
+```
+
 ```mermaid
 gitGraph TB:
     commit
