@@ -16,5 +16,5 @@ services:
     user: '$UID:$GID'
     ports:
       - 5050:80
-    volumes:
-      - ./docker-data/pgadmin-data:/var/lib/pgadmin
+    # volumes:
+    #   - ./docker-data/pgadmin-data:/var/lib/pgadmin
