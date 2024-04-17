@@ -66,6 +66,10 @@ develop the database schema should be explicitly defined.
 
 Git workflow example of this git repo:
 
+Never commit directly to the `main` or the `develop` branch. Instead branch from
+`develop` and implement your feature there, when you are done submit a pull
+request to `develop` branch.
+
 ```mermaid
 gitGraph TB:
     commit
