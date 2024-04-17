@@ -1,26 +1,19 @@
 services:
-  web:
-    build: .
-    ports:
-      - "80:8000"
-    depends_on:
-      db:
-        condition: service_healthy
-    command: ["python", "src/app.py"]
- 
-  db:
+  database:
     image: postgres
     restart: always
-    environment:
-      POSTGRES_PASSWORD: password
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 1s
-      timeout: 5s
-      retries: 10
- 
-  adminer:
-    image: adminer
-    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
     ports:
-      - 8080:8080
+      - 5432:5432
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    user: '$UID:$GID'
+    ports:
+      - 5050:80
+    volumes:
+      - ./docker-data/pgadmin-data:/var/lib/pgadmin
