@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
     ports:
-      - ${POSTGRES_PORT}:5432
+      - ${DB_PORT}:5432
 
   pgadmin:
     image: dpage/pgadmin4
