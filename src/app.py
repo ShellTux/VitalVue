@@ -60,6 +60,12 @@ def connect_db(
             database=database
             )
 
+def validate_payload(payload, values):
+    for value in values:
+        if value not in payload:
+            return {'status': StatusCode.API_ERROR.value, 
+                    'results': f'{value} value not in payload'}
+    return {}
 
 ################################################################################
 ## LANDING PAGE
@@ -86,6 +92,32 @@ def landing_page():
 ## > curl -X POST http://localhost:5433/register/patient - H 'Content-Type: application/json' - d ''
 ################################################################################
 
+statement_handlers = {
+    IndividualTypes.DOCTOR:     """
+                                    INSERT INTO employee (id, contract_details)
+                                    VALUES (%d, %s);
+                                """,
+    IndividualTypes.NURSE:      """
+                                    INSERT INTO employee (id, contract_details)
+                                    VALUES (%d, %s);
+                                """,
+    IndividualTypes.ASSISTANT:  """
+                                    INSERT INTO employee (id, contract_details)
+                                    VALUES (%d, %s);
+                                """,
+    IndividualTypes.PATIENT:    """
+                                    INSERT INTO patient (id)
+                                    VALUES (%d);
+                                """
+}
+
+values_handlers = {
+    IndividualTypes.DOCTOR:     ['id', 'contract_details'],
+    IndividualTypes.NURSE:      ['id', 'contract_details'],
+    IndividualTypes.ASSISTANT:  ['id', 'contract_details'],
+    IndividualTypes.PATIENT:    ['id']
+}
+
 @app.route('/register/<registration_type>', methods=['POST'])
 def register(registration_type):
     #logger.info('POST /register/<registration_type>')
@@ -95,14 +127,14 @@ def register(registration_type):
         conn = connect_db()
         cursor = conn.cursor
 
-        # TODO: Complete statement and values based on registration type
-        statement = """"
-            INSERT INTO employee (id, contract_details)
-            VALUES %d, %s;
-        """
-        values = 
-
-        # TODO: Validate arguments
+        #TODO: Complete statement and values based on registration type
+        #TODO: Validate arguments values
+        statement = statement_handlers.get(registration_type)
+        values = values_handlers.get(registration_type)
+        response = validate_payload(payload, values)
+        if response:
+            jsonify(response)
+        statement_values = [payload[key] for key in values]
 
         try:
             cursor.execute(statement, values)
@@ -111,8 +143,9 @@ def register(registration_type):
             response = { 'status': StatusCode.SUCCESS.value, 'results': 'Registered new individual' }
 
         except (Exception, psycopg2.DatabaseError) as error:
-            response = {'status': StatusCode.API_ERROR.value, 'error': str(error)}
+            response = {'status': StatusCode.INTERNAL_ERROR.value, 'error': str(error)}
 
+            conn.rollback()
         finally:
             if conn is not None:
                 conn.close()
