@@ -68,12 +68,13 @@ def connect_db(
 @app.route('/')
 def landing_page():
     return """
-    Hello World (Python Native)!  <br/>
-    <br/>
-    Check the sources for instructions on how to use the endpoints!<br/>
-    <br/>
-    BD 2023-2024 Team<br/>
-    <br/>
+     ___ ___ __ __         __ ___ ___             
+    |   Y   |__|  |_.---.-|  |   Y   .--.--.-----.
+    |.  |   |  |   _|  _  |  |.  |   |  |  |  -__|
+    |.  |   |__|____|___._|__|.  |   |_____|_____|
+    |:  1   |                |:  1   |            
+     \:.. ./                  \:.. ./             
+      `---'                    `---'              
     """
 
 ################################################################################
@@ -91,11 +92,31 @@ def register(registration_type):
     payload = request.get_json()
 
     if registration_type in tuple(individual.value for individual in IndividualTypes):
-        response = { 'status': StatusCode.SUCCESS.value }
+        conn = connect_db()
+        cursor = conn.cursor
 
-        #conn = connect_db()
-        #cursor = conn.cursor
-        #conn.close()
+        # TODO: Complete statement and values based on registration type
+        statement = """"
+            INSERT INTO employee (id, contract_details)
+            VALUES %d, %s;
+        """
+        values = 
+
+        # TODO: Validate arguments
+
+        try:
+            cursor.execute(statement, values)
+
+            conn.commit()
+            response = { 'status': StatusCode.SUCCESS.value, 'results': 'Registered new individual' }
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            response = {'status': StatusCode.API_ERROR.value, 'error': str(error)}
+
+        finally:
+            if conn is not None:
+                conn.close()
+
     else:
         response = {'status': StatusCode.API_ERROR.value, 'error': 'Invalid registration type'}
 
