@@ -25,21 +25,10 @@
 
 from dotenv import dotenv_values
 from flask import Flask, request, jsonify
+from StatusCode import StatusCode
+from IndividualTypes import IndividualTypes
 import logging
 import psycopg2
-
-from enum import Enum
-
-class StatusCode(Enum):
-    SUCCESS = 200
-    API_ERROR = 400
-    INTERNAL_ERROR = 500
-
-class IndividualTypes(Enum):
-    PATIENT = 'patient'
-    ASSISTANT = 'assistant'
-    NURSE = 'nurse'
-    DOCTOR = 'doctor'
 
 CONFIG = dotenv_values('.env')
 app = Flask(__name__)
@@ -63,7 +52,7 @@ def connect_db(
 def validate_payload(payload, values):
     for value in values:
         if value not in payload:
-            return {'status': StatusCode.API_ERROR.value, 
+            return {'status': StatusCode.API_ERROR.value,
                     'results': f'{value} value not in payload'}
     return {}
 
@@ -97,69 +86,46 @@ def landing_page():
 ## > curl -X POST http://localhost:5433/register/patient - H 'Content-Type: application/json' - d ''
 ################################################################################
 
-statement_handlers = {
-    IndividualTypes.DOCTOR:     """
-                                    INSERT INTO employee (id, contract_details)
-                                    VALUES (%d, %s);
-                                """,
-    IndividualTypes.NURSE:      """
-                                    INSERT INTO employee (id, contract_details)
-                                    VALUES (%d, %s);
-                                """,
-    IndividualTypes.ASSISTANT:  """
-                                    INSERT INTO employee (id, contract_details)
-                                    VALUES (%d, %s);
-                                """,
-    IndividualTypes.PATIENT:    """
-                                    INSERT INTO patient (id)
-                                    VALUES (%d);
-                                """
-}
-
-values_handlers = {
-    IndividualTypes.DOCTOR:     ['id', 'contract_details'],
-    IndividualTypes.NURSE:      ['id', 'contract_details'],
-    IndividualTypes.ASSISTANT:  ['id', 'contract_details'],
-    IndividualTypes.PATIENT:    ['id']
-}
-
-@app.route('/register/<registration_type>/', methods=['POST'])
-def register(registration_type):
+@app.route('/register/<registration_type>', methods=['POST'])
+def register(registration_type: str):
     #logger.info('POST /register/<registration_type>')
     payload = request.get_json()
 
-    if registration_type in tuple(individual.value for individual in IndividualTypes):
-        conn = connect_db()
-        cursor = conn.cursor
+    if registration_type not in IndividualTypes:
+        return jsonify({'status': StatusCode.API_ERROR.value,
+                        'error': 'Invalid registration type'})
 
-        #TODO: Complete statement and values based on registration type
-        #TODO: Validate arguments values
-        statement = statement_handlers.get(registration_type)
-        values = values_handlers.get(registration_type)
-        response = validate_payload(payload, values)
-        if response:
-            jsonify(response)
-        statement_values = [payload[key] for key in values]
+    individual = IndividualTypes(registration_type)
+    print(individual.value)
 
-        try:
-            cursor.execute(statement, statement_values)
+    conn = connect_db()
+    cursor = conn.cursor()
 
-            conn.commit()
-            response = { 'status': StatusCode.SUCCESS.value, 
-                        'results': 'Registered new individual' }
+    #TODO: Complete statement and values based on registration type
+    #TODO: Validate arguments values
+    values = individual.get_values()
+    response = validate_payload(payload, values)
 
-        except (Exception, psycopg2.DatabaseError) as error:
-            response = {'status': StatusCode.INTERNAL_ERROR.value, 
-                        'error': str(error)}
-            conn.rollback()
+    if response:
+        jsonify(response)
 
-        finally:
-            if conn is not None:
-                conn.close()
+    statement_values = [payload[key] for key in values]
 
-    else:
-        response = {'status': StatusCode.API_ERROR.value, 
-                    'error': 'Invalid registration type'}
+    try:
+        cursor.execute(individual.sql_insert_statement(), statement_values)
+
+        conn.commit()
+        response = { 'status': StatusCode.SUCCESS.value,
+                    'results': 'Registered new individual' }
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        response = {'status': StatusCode.INTERNAL_ERROR.value,
+                    'error': str(error)}
+        conn.rollback()
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
@@ -222,8 +188,6 @@ def see_appointments(patient_user_id):
     try:
         cursor.execute(statement, statement_values)
         rows = cursor.fetchall()
-
-        
 
         response = {'status': StatusCode.SUCCESS.value}
 
