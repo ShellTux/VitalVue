@@ -118,7 +118,7 @@ values_handlers = {
     IndividualTypes.PATIENT:    ['id']
 }
 
-@app.route('/register/<registration_type>', methods=['POST'])
+@app.route('/register/<registration_type>/', methods=['POST'])
 def register(registration_type):
     #logger.info('POST /register/<registration_type>')
     payload = request.get_json()
@@ -137,26 +137,30 @@ def register(registration_type):
         statement_values = [payload[key] for key in values]
 
         try:
-            cursor.execute(statement, values)
+            cursor.execute(statement, statement_values)
 
             conn.commit()
-            response = { 'status': StatusCode.SUCCESS.value, 'results': 'Registered new individual' }
+            response = { 'status': StatusCode.SUCCESS.value, 
+                        'results': 'Registered new individual' }
 
         except (Exception, psycopg2.DatabaseError) as error:
-            response = {'status': StatusCode.INTERNAL_ERROR.value, 'error': str(error)}
-
+            response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                        'error': str(error)}
             conn.rollback()
+
         finally:
             if conn is not None:
                 conn.close()
 
     else:
-        response = {'status': StatusCode.API_ERROR.value, 'error': 'Invalid registration type'}
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'error': 'Invalid registration type'}
 
     return jsonify(response)
 
 ################################################################################
 ## USER AUTHENTICATION
+##
 ## Login using the username and password. In case of success, the returning
 ## token will be included in the header of the remaining requests.
 ##
@@ -165,9 +169,65 @@ def register(registration_type):
 ##   {"username": username, "password": password}
 ################################################################################
 
-@app.route('/user', methods=['PUT'])
+@app.route('/user/', methods=['PUT'])
 def user_authentication():
     payload = request.get_json()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## SCHEDULE APPOINTMENT
+##
+## 
+################################################################################
+
+@app.route('/appointment/', methods=['POST'])
+def schedule_appointment():
+    payload = request.get_json()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## SEE APPOINTMENTS
+##
+## 
+################################################################################
+
+@app.route('/appointments/<patient_user_id>/', methods=['GET'])
+def see_appointments(patient_user_id):
+    payload = request.get_json()
+
+    statement = """
+                    SELECT *
+                    FROM appointment AS ap
+                    WHERE ap.patient_id = %s
+                """
+    statement_values = (patient_user_id,)
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(statement, statement_values)
+        rows = cursor.fetchall()
+
+        
+
+        response = {'status': StatusCode.SUCCESS.value}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     response = {'status': StatusCode.SUCCESS.value}
 
