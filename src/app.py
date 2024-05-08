@@ -46,11 +46,11 @@ app = Flask(__name__)
 
 def connect_db(
         *,
-        user: str | None     = CONFIG.get('USER'),
-        password: str | None = CONFIG.get('PASSWORD'),
-        host: str | None     = CONFIG.get('SERVER_HOST'),
-        port: str | None     = CONFIG.get('DATABASE_PORT'),
-        database: str | None = CONFIG.get('DATABASE')
+        user: str | None     = CONFIG.get('POSTGRES_USER'),
+        password: str | None = CONFIG.get('POSTGRES_PASSWORD'),
+        host: str | None     = CONFIG.get('DB_HOST'),
+        port: str | None     = CONFIG.get('DB_PORT'),
+        database: str | None = CONFIG.get('POSTGRES_DB')
         ):
     return psycopg2.connect(
             user=user,
