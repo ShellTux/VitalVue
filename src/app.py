@@ -24,7 +24,17 @@
 ################################################################################
 
 from dotenv import dotenv_values
-from flask import Flask, request, jsonify
+
+from flask import Flask
+from flask import request
+from flask import jsonify
+from flask_login import LoginManager, login_user, logout_user, login_required
+
+from flask_jwt_extended import JWTManager
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+
 from StatusCode import StatusCode
 from IndividualTypes import IndividualTypes
 import logging
@@ -32,6 +42,13 @@ import psycopg2
 
 CONFIG = dotenv_values('.env')
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret_key'
+
+# Setup Flask-JWT-Extended extension
+app.config['JWT_SECRET_KEY'] = 'secret_key' #TODO: Create config setting from jwt key
+jwt = JWTManager(app)
+
+login_manager = LoginManager(app)
 
 def connect_db(
         *,
@@ -98,21 +115,20 @@ def register(registration_type: str):
     individual = IndividualTypes(registration_type)
     print(individual.value)
 
-    conn = connect_db()
-    cursor = conn.cursor()
-
-    #TODO: Complete statement and values based on registration type
-    #TODO: Validate arguments values
     values = individual.get_values()
     response = validate_payload(payload, values)
 
     if response:
-        jsonify(response)
+        return jsonify(response)
 
+    statement = individual.sql_insert_statement()
     statement_values = [payload[key] for key in values]
 
+    conn = connect_db()
+    cursor = conn.cursor()
+
     try:
-        cursor.execute(individual.sql_insert_statement(), statement_values)
+        cursor.execute(statement, statement_values)
 
         conn.commit()
         response = { 'status': StatusCode.SUCCESS.value,
@@ -144,17 +160,38 @@ def register(registration_type: str):
 def user_authentication():
     payload = request.get_json()
 
-    response = {'status': StatusCode.SUCCESS.value}
+    statement = """"""
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(statement)
+
+        # TODO: Authentication sql statement
+        access_token = create_access_token(identity=payload['username'])
+
+        response = {'status': StatusCode.SUCCESS.value,
+                    'results': access_token}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        response = {'status': StatusCode.INTERNAL_ERROR.value,
+                    'error': str(error)}
+        
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
 ################################################################################
 ## SCHEDULE APPOINTMENT
-##
+## -- Only patients
 ## 
 ################################################################################
 
 @app.route('/appointment/', methods=['POST'])
+@jwt_required()
 def schedule_appointment():
     payload = request.get_json()
 
@@ -167,11 +204,12 @@ def schedule_appointment():
 
 ################################################################################
 ## SEE APPOINTMENTS
-##
+## -- Only assistants and target patients
 ## 
 ################################################################################
 
 @app.route('/appointments/<patient_user_id>/', methods=['GET'])
+@jwt_required()
 def see_appointments(patient_user_id):
     payload = request.get_json()
 
@@ -192,7 +230,8 @@ def see_appointments(patient_user_id):
         response = {'status': StatusCode.SUCCESS.value}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        response = {'status': StatusCode.INTERNAL_ERROR.value, 'errors': str(error)}
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
 
     finally:
         if conn is not None:
