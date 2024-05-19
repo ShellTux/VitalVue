@@ -46,10 +46,10 @@ CONFIG = dotenv_values('.env')
 
 # setup flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret_key' #TODO: Create config setting for secret key
+app.config['SECRET_KEY'] = 'secret_key' #TODO Create config setting for secret key
 
 # setup Flask-JWT-Extended extension
-app.config['JWT_SECRET_KEY'] = 'secret_key' #TODO: Create config setting for jwt secret key
+app.config['JWT_SECRET_KEY'] = 'secret_key' #TODO Create config setting for jwt secret key
 jwt = JWTManager(app)
 
 # declare logger
@@ -102,7 +102,7 @@ def landing_page():
 ################################################################################
 ## REGISTER NEW INDIVIDUAL
 ##
-## Registers a new individual taking the individual type into consideration
+## Registers a new individual taking the type into consideration
 ##
 ## How to use in curl:
 ## > curl -X POST http://localhost:5433/register/patient - H 'Content-Type: application/json' - d ''
@@ -110,7 +110,7 @@ def landing_page():
 
 @app.route('/register/<registration_type>/', methods=['POST'])
 def register(registration_type: str):
-    logger.info('POST /register/<registration_type>')
+    logger.info(f'POST {request.path}')
 
     payload = request.get_json()
 
@@ -141,6 +141,7 @@ def register(registration_type: str):
                     'results': 'Registered new individual' }
 
     except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'POST {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value,
                     'error': str(error)}
         conn.rollback()
@@ -164,7 +165,7 @@ def register(registration_type: str):
 
 @app.route('/user/', methods=['PUT'])
 def user_authentication():
-    logger.info('PUT /user/')
+    logger.info(f'PUT {request.path}')
 
     payload = request.get_json()
 
@@ -176,13 +177,14 @@ def user_authentication():
     try:
         cursor.execute(statement)
 
-        # TODO: Authentication sql statement
+        # TODO Authentication sql statement
         access_token = create_access_token(identity=payload['username'])
 
         response = {'status': StatusCode.SUCCESS.value,
                     'results': access_token}
 
     except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'PUT {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value,
                     'error': str(error)}
         
@@ -201,7 +203,7 @@ def user_authentication():
 @app.route('/appointment/', methods=['POST'])
 @jwt_required()
 def schedule_appointment():
-    logger.info('POST /appointment/')
+    logger.info(f'POST {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -210,7 +212,24 @@ def schedule_appointment():
     conn = connect_db()
     cursor = conn.cursor()
 
-    response = {'status': StatusCode.SUCCESS.value}
+    statement = ""
+    values = ""
+
+    try:
+        cursor.execute(statement, values)
+
+        results = []
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'POST {request.path} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
@@ -223,7 +242,7 @@ def schedule_appointment():
 @app.route('/appointments/<patient_user_id>/', methods=['GET'])
 @jwt_required()
 def see_appointments(patient_user_id):
-    logger.info('GET /appointments/<patient_user_id>')
+    logger.info(f'GET {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -246,6 +265,7 @@ def see_appointments(patient_user_id):
         response = {'status': StatusCode.SUCCESS.value}
 
     except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'GET {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
@@ -263,14 +283,11 @@ def see_appointments(patient_user_id):
 ## 
 ################################################################################
 
-@app.route('/surgery/', methods = ['POST'], defaults = {'hospitalization_id': None})
+@app.route('/surgery/', defaults = {'hospitalization_id': None}, methods = ['POST'])
 @app.route('/surgery/<hospitalization_id>/', methods = ['POST'])
 @jwt_required()
 def schedule_surgery(hospitalization_id):
-    if hospitalization_id:
-        logger.info('POST /surgery/<hospitalization_id>')
-    else:
-        logger.info('POST /surgery/')
+    logger.info(f'POST {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -279,7 +296,24 @@ def schedule_surgery(hospitalization_id):
     conn = connect_db()
     cursor = conn.cursor()
 
-    response = {'status': StatusCode.SUCCESS.value}
+    statement = ""
+    values = ""
+
+    try:
+        cursor.execute(statement, values)
+
+        results = []
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'POST {request.path} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
@@ -292,7 +326,7 @@ def schedule_surgery(hospitalization_id):
 @app.route('/prescriptions/<person_id>/', methods = ['GET'])
 @jwt_required()
 def get_prescriptions(person_id):
-    logger.info('GET /prescriptions/<person_id>/')
+    logger.info(f'GET {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -312,10 +346,13 @@ def get_prescriptions(person_id):
         for row in rows:
             results.append({})
 
-        response = {'status': StatusCode.SUCCESS.value, 'results': results}
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        response = {'status': StatusCode.INTERNAL_ERROR.value, 'errors': str(error)}
+        logger.error(f'GET {request.path} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
 
     finally:
         if conn is not None:
@@ -334,7 +371,7 @@ def get_prescriptions(person_id):
 @app.route('/prescription/', methods = ['POST'])
 @jwt_required()
 def add_prescription():
-    logger.info('POST /prescription/')
+    logger.info(f'POST {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -343,7 +380,24 @@ def add_prescription():
     conn = connect_db()
     cursor = conn.cursor()
 
-    response = {'status': StatusCode.SUCCESS.value}
+    statement = ""
+    values = ""
+
+    try:
+        cursor.execute(statement, values)
+
+        results = []
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'POST {request.path} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
@@ -356,7 +410,7 @@ def add_prescription():
 @app.route('/bills/<bill_id>', methods = ['POST'])
 @jwt_required()
 def execute_payment(bill_id):
-    logger.info('POST /bills/<bill_id>/')
+    logger.info(f'POST {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -365,7 +419,24 @@ def execute_payment(bill_id):
     conn = connect_db()
     cursor = conn.cursor()
 
-    response = {'status': StatusCode.SUCCESS.value}
+    statement = ""
+    values = ""
+
+    try:
+        cursor.execute(statement, values)
+
+        results = []
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'POST {request.path} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
@@ -378,7 +449,7 @@ def execute_payment(bill_id):
 @app.route('/top3/', methods = ['GET'])
 @jwt_required()
 def list_top3_patients():
-    logger.info('GET /top3/')
+    logger.info(f'GET {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -387,7 +458,24 @@ def list_top3_patients():
     conn = connect_db()
     cursor = conn.cursor()
 
-    response = {'status': StatusCode.SUCCESS.value}
+    statement = ""
+    values = ""
+
+    try:
+        cursor.execute(statement, values)
+
+        results = []
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'GET {request.path} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
@@ -400,7 +488,7 @@ def list_top3_patients():
 @app.route('/daily/<year_month_day>/', methods = ['GET'])
 @jwt_required()
 def daily_summary(year_month_day):
-    logger.info('GET /daily/<year_month_day>/')
+    logger.info(f'GET {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -409,7 +497,24 @@ def daily_summary(year_month_day):
     conn = connect_db()
     cursor = conn.cursor()
 
-    response = {'status': StatusCode.SUCCESS.value}
+    statement = ""
+    values = ""
+
+    try:
+        cursor.execute(statement, values)
+
+        results = []
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'GET {request.path} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
@@ -422,7 +527,7 @@ def daily_summary(year_month_day):
 @app.route('/report/', methods = ['GET'])
 @jwt_required()
 def generate_monthly_report():
-    logger.info('GET /report/')
+    logger.info(f'GET {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -431,7 +536,24 @@ def generate_monthly_report():
     conn = connect_db()
     cursor = conn.cursor()
 
-    response = {'status': StatusCode.SUCCESS.value}
+    statement = ""
+    values = ""
+
+    try:
+        cursor.execute(statement, values)
+
+        results = []
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'GET {request.path} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 
+                    'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
 
     return jsonify(response)
 
@@ -455,13 +577,13 @@ def main():
     # run application
     port = 8080 if CONFIG['SERVER_PORT'] is None else int(CONFIG['SERVER_PORT'])
     url = f'http://{CONFIG.get("SERVER_HOST")}:{port}/'
+    logger.info(f"Vital Vue API v1.0 online: {url}")
     app.run(
             host=CONFIG.get('SERVER_HOST'),
             debug=True,
             threaded=True,
             port=port
             )
-    logger.info(f"Vital Vue API v1.0 online: {url}")
 
 if __name__ == "__main__":
     main()
