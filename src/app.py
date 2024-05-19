@@ -7,9 +7,10 @@
 #                                  \:.. ./                  \:.. ./             
 #                                   `---'                    `---'              
 #
-# Author: João Alves,  2016122878
-# Author: Luís Góis,   2018280716
-# Author: Marco Silva, 2021211653
+# Authors:
+#   João Alves,  2016122878
+#   Luís Góis,   2018280716
+#   Marco Silva, 2021211653
 #
 # This software is licensed as described in the file LICENSE, which
 # you should have received as part of this distribution.
@@ -28,27 +29,31 @@ from dotenv import dotenv_values
 from flask import Flask
 from flask import request
 from flask import jsonify
-from flask_login import LoginManager, login_user, logout_user, login_required
 
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt
 
 from StatusCode import StatusCode
 from IndividualTypes import IndividualTypes
+
 import logging
 import psycopg2
 
 CONFIG = dotenv_values('.env')
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret_key'
 
-# Setup Flask-JWT-Extended extension
-app.config['JWT_SECRET_KEY'] = 'secret_key' #TODO: Create config setting from jwt key
+# setup flask app
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret_key' #TODO: Create config setting for secret key
+
+# setup Flask-JWT-Extended extension
+app.config['JWT_SECRET_KEY'] = 'secret_key' #TODO: Create config setting for jwt secret key
 jwt = JWTManager(app)
 
-login_manager = LoginManager(app)
+# declare logger
+logger = logging.getLogger('logger')
 
 def connect_db(
         *,
@@ -103,9 +108,10 @@ def landing_page():
 ## > curl -X POST http://localhost:5433/register/patient - H 'Content-Type: application/json' - d ''
 ################################################################################
 
-@app.route('/register/<registration_type>', methods=['POST'])
+@app.route('/register/<registration_type>/', methods=['POST'])
 def register(registration_type: str):
-    #logger.info('POST /register/<registration_type>')
+    logger.info('POST /register/<registration_type>')
+
     payload = request.get_json()
 
     if registration_type not in IndividualTypes:
@@ -158,6 +164,8 @@ def register(registration_type: str):
 
 @app.route('/user/', methods=['PUT'])
 def user_authentication():
+    logger.info('PUT /user/')
+
     payload = request.get_json()
 
     statement = """"""
@@ -186,13 +194,17 @@ def user_authentication():
 
 ################################################################################
 ## SCHEDULE APPOINTMENT
-## -- Only patients
+## -- only patients
 ## 
 ################################################################################
 
 @app.route('/appointment/', methods=['POST'])
 @jwt_required()
 def schedule_appointment():
+    logger.info('POST /appointment/')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
     payload = request.get_json()
 
     conn = connect_db()
@@ -204,13 +216,17 @@ def schedule_appointment():
 
 ################################################################################
 ## SEE APPOINTMENTS
-## -- Only assistants and target patients
+## -- only assistants and target patients
 ## 
 ################################################################################
 
 @app.route('/appointments/<patient_user_id>/', methods=['GET'])
 @jwt_required()
 def see_appointments(patient_user_id):
+    logger.info('GET /appointments/<patient_user_id>')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
     payload = request.get_json()
 
     statement = """
@@ -242,10 +258,190 @@ def see_appointments(patient_user_id):
     return jsonify(response)
 
 ################################################################################
+## SCHEDULE SURGERY
+## -- only assistants
+## 
+################################################################################
+
+@app.route('/surgery/', methods = ['POST'], defaults = {'hospitalization_id': None})
+@app.route('/surgery/<hospitalization_id>/', methods = ['POST'])
+@jwt_required()
+def schedule_surgery(hospitalization_id):
+    if hospitalization_id:
+        logger.info('POST /surgery/<hospitalization_id>')
+    else:
+        logger.info('POST /surgery/')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
+    payload = request.get_json()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## GET PRESCRIPTIONS
+## -- only employees and target patient
+## 
+################################################################################
+
+@app.route('/prescriptions/<person_id>/', methods = ['GET'])
+@jwt_required()
+def get_prescriptions(person_id):
+    logger.info('GET /prescriptions/<person_id>/')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
+    payload = request.get_json()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    statement = ""
+    values = ""
+
+    try:
+        cursor.execute(statement, values)
+        rows = cursor.fetchall()
+
+        results = []
+        for row in rows:
+            results.append({})
+
+        response = {'status': StatusCode.SUCCESS.value, 'results': results}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        response = {'status': StatusCode.INTERNAL_ERROR.value, 'errors': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## ADD PRESCRIPTIONS
+## -- only doctors
+## 
+################################################################################
+
+@app.route('/prescription/', methods = ['POST'])
+@jwt_required()
+def add_prescription():
+    logger.info('POST /prescription/')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
+    payload = request.get_json()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## EXECUTE PAYMENT
+## -- only the owning patient
+## 
+################################################################################
+
+@app.route('/bills/<bill_id>', methods = ['POST'])
+@jwt_required()
+def execute_payment(bill_id):
+    logger.info('POST /bills/<bill_id>/')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
+    payload = request.get_json()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## LIST TOP 3 PATIENTS
+## -- only assistants
+## 
+################################################################################
+
+@app.route('/top3/', methods = ['GET'])
+@jwt_required()
+def list_top3_patients():
+    logger.info('GET /top3/')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
+    payload = request.get_json()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## DAILY SUMMARY
+## -- only assistants
+## 
+################################################################################
+
+@app.route('/daily/<year_month_day>/', methods = ['GET'])
+@jwt_required()
+def daily_summary(year_month_day):
+    logger.info('GET /daily/<year_month_day>/')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
+    payload = request.get_json()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## GENERATE MONTHLY REPORT
+## -- only assistants
+## 
+################################################################################
+
+@app.route('/report/', methods = ['GET'])
+@jwt_required()
+def generate_monthly_report():
+    logger.info('GET /report/')
+
+    token = get_jwt()
+    identity = get_jwt_identity()
+    payload = request.get_json()
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    response = {'status': StatusCode.SUCCESS.value}
+
+    return jsonify(response)
+
+################################################################################
+## ENTRY POINT
+################################################################################
 
 def main():
     # set up logging
-    logging.basicConfig(filename='log_file.log')
+    logging.basicConfig(filename='vitalvue.log')
     logger = logging.getLogger('logger')
     logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
@@ -256,6 +452,7 @@ def main():
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
+    # run application
     port = 8080 if CONFIG['SERVER_PORT'] is None else int(CONFIG['SERVER_PORT'])
     url = f'http://{CONFIG.get("SERVER_HOST")}:{port}/'
     app.run(
@@ -264,7 +461,7 @@ def main():
             threaded=True,
             port=port
             )
-    logger.info(f"API v1.0 online: {url}")
+    logger.info(f"Vital Vue API v1.0 online: {url}")
 
 if __name__ == "__main__":
     main()
