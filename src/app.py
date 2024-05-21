@@ -114,13 +114,11 @@ def register(registration_type: str):
 
     payload = request.get_json()
 
-    if registration_type not in IndividualTypes:
-        return jsonify({'status': StatusCode.API_ERROR.value,
-                        'error': 'Invalid registration type'})
+    #if registration_type not in IndividualTypes:
+    #    return jsonify({'status': StatusCode.API_ERROR.value,
+    #                    'error': 'Invalid registration type'})
 
     individual = IndividualTypes(registration_type)
-    print(individual.value)
-
     values = individual.get_values()
     response = validate_payload(payload, values)
 
@@ -132,6 +130,8 @@ def register(registration_type: str):
 
     conn = connect_db()
     cursor = conn.cursor()
+
+    print(statement)
 
     try:
         cursor.execute(statement, statement_values)
