@@ -126,15 +126,15 @@ def register(registration_type: str):
         return jsonify(response)
 
     statement = individual.sql_insert_statement()
-    statement_values = [payload[key] for key in values]
+    input_values = [payload[key] for key in values]
 
     conn = connect_db()
     cursor = conn.cursor()
 
-    print(statement)
-
     try:
-        cursor.execute(statement)
+        cursor.execute(statement, input_values)
+
+        # TODO Update this endpoint so that it returns the user id if successful
 
         conn.commit()
         response = {'status': StatusCode.SUCCESS.value,
@@ -171,31 +171,32 @@ def user_authentication():
 
     statement = """
                 SELECT u.username, u.password, u.type
-                FROM system_user AS u
+                FROM vital_vue_user AS u
                 WHERE u.username = %s AND u.password = %s;
                 """
     values = ['username', 'password']
     input_values = [payload[key] for key in values]
 
+    response = validate_payload(payload, values)
+    if response:
+        return jsonify(response)
+
     conn = connect_db()
     cursor = conn.cursor()
-
-    print(input_values)
 
     try:
         cursor.execute(statement, input_values)
         rows = cursor.fetchall()
-        row = rows[0]
 
-        if (row[0] == input_values[0] and row[1] == input_values[1]):
+        if rows:
+            row = rows[0]
             access_token = create_access_token(identity=payload['username'])
             response = {'status': StatusCode.SUCCESS.value,
                         'results': access_token}
         else:
             response = {'status': StatusCode.API_ERROR.value, 
                         'results': 'Invalid login credentials'}
-        
-
+            
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'PUT {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value,
