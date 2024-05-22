@@ -28,7 +28,7 @@ class IndividualTypes(StrEnum):
                 cls.ASSISTANT: ['username', 'contract_details'],
                 cls.DOCTOR:    ['username', 'password', 'email', 
                                 'contract_details', 'username', 
-                                'license', 'username'],
+                                'license', 'name', 'username'],
                 cls.NURSE:    ['id', 'contract_details'],
                 cls.PATIENT:   ['id']
                 }
@@ -39,14 +39,14 @@ class IndividualTypes(StrEnum):
     @classmethod
     def sql_insert_statement_handlers(cls):
         return {
-            cls.DOCTOR:    '''
-INSERT INTO system_user (username, password, email, type)
-VALUES (%s, %s, %s, 'doctor');
-INSERT INTO employee (contract_details, system_user_username)
-VALUES (%s, %s);
-INSERT INTO doctor (license, system_user_username)
-VALUES (%s, %s);
-            ''',
+            cls.DOCTOR:    r"""
+            INSERT INTO system_user (username, password, email, "type")
+            VALUES (%s, %s, %s, 'doctor');
+            INSERT INTO employee (contract_details, name, system_user_username)
+            VALUES (%s, %s, %s);
+            INSERT INTO doctor (license, employee_system_user_username)
+            VALUES (%s, %s);
+            """,
             cls.NURSE:     r"""
             INSERT INTO employee (id, contract_details)
             VALUES (%d, %s);

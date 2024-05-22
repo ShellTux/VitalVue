@@ -134,11 +134,11 @@ def register(registration_type: str):
     print(statement)
 
     try:
-        cursor.execute(statement, statement_values)
+        cursor.execute(statement)
 
         conn.commit()
-        response = { 'status': StatusCode.SUCCESS.value,
-                    'results': 'Registered new individual' }
+        response = {'status': StatusCode.SUCCESS.value,
+                    'results': 'Registered new individual'}
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'POST {request.path} - error: {error}')
