@@ -27,9 +27,9 @@ class IndividualTypes(StrEnum):
         return {
                 cls.ASSISTANT: ['username', 'contract_details'],
                 cls.DOCTOR:    ['username', 'password', 'email', 
-                                'contract_details', 'username', 
-                                'license', 'name', 'username'],
-                cls.NURSE:    ['id', 'contract_details'],
+                                'contract_details', 'name', 'username', 
+                                'license', 'username'],
+                cls.NURSE:     ['id', 'contract_details'],
                 cls.PATIENT:   ['id']
                 }
 
@@ -40,11 +40,11 @@ class IndividualTypes(StrEnum):
     def sql_insert_statement_handlers(cls):
         return {
             cls.DOCTOR:    r"""
-            INSERT INTO system_user (username, password, email, "type")
+            INSERT INTO vital_vue_user (username, password, email, type)
             VALUES (%s, %s, %s, 'doctor');
-            INSERT INTO employee (contract_details, name, system_user_username)
+            INSERT INTO employee (contract_details, name, vital_vue_user_username)
             VALUES (%s, %s, %s);
-            INSERT INTO doctor (license, employee_system_user_username)
+            INSERT INTO doctor (license, employee_vital_vue_user_username)
             VALUES (%s, %s);
             """,
             cls.NURSE:     r"""
