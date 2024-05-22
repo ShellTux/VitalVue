@@ -169,19 +169,32 @@ def user_authentication():
 
     payload = request.get_json()
 
-    statement = """"""
+    statement = """
+                SELECT u.username, u.password, u.type
+                FROM system_user AS u
+                WHERE u.username = %s AND u.password = %s;
+                """
+    values = ['username', 'password']
+    input_values = [payload[key] for key in values]
 
     conn = connect_db()
     cursor = conn.cursor()
 
+    print(input_values)
+
     try:
-        cursor.execute(statement)
+        cursor.execute(statement, input_values)
+        rows = cursor.fetchall()
+        row = rows[0]
 
-        # TODO Authentication sql statement
-        access_token = create_access_token(identity=payload['username'])
-
-        response = {'status': StatusCode.SUCCESS.value,
-                    'results': access_token}
+        if (row[0] == input_values[0] and row[1] == input_values[1]):
+            access_token = create_access_token(identity=payload['username'])
+            response = {'status': StatusCode.SUCCESS.value,
+                        'results': access_token}
+        else:
+            response = {'status': StatusCode.API_ERROR.value, 
+                        'results': 'Invalid login credentials'}
+        
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'PUT {request.path} - error: {error}')
