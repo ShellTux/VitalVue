@@ -117,9 +117,9 @@ def register(registration_type: str):
 
     payload = request.get_json()
 
-    #if registration_type not in IndividualTypes:
-    #    return jsonify({'status': StatusCode.API_ERROR.value,
-    #                    'error': 'Invalid registration type'})
+    if registration_type not in IndividualTypes:
+       return jsonify({'status': StatusCode.API_ERROR.value,
+                       'error': 'Invalid registration type'})
 
     individual = IndividualTypes(registration_type)
     logging.debug(individual.value)
