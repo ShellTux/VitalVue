@@ -47,10 +47,12 @@ CONFIG = dotenv_values('.env')
 
 # setup flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret_key' #TODO Create config setting for secret key
+# TODO: Create config setting for secret key
+app.config['SECRET_KEY'] = 'secret_key'
 
 # setup Flask-JWT-Extended extension
-app.config['JWT_SECRET_KEY'] = 'secret_key' #TODO Create config setting for jwt secret key
+# TODO: Create config setting for jwt secret key
+app.config['JWT_SECRET_KEY'] = 'secret_key'
 jwt = JWTManager(app)
 
 fileConfig('logging_config.ini')
@@ -124,38 +126,42 @@ def register(registration_type: str):
     individual = IndividualTypes(registration_type)
     logging.debug(individual.value)
 
-    values = individual.get_values()
-    response = validate_payload(payload, values)
+    key_values = individual.get_values()
+    input_values = validate_payload(payload, key_values)
 
-    if response:
-        return jsonify(response)
+    if input_values:
+        return jsonify(input_values)
 
-    statement = individual.sql_insert_statement()
-    statement_values = [payload[key] for key in values]
+    statement_values = individual.sql_insert_statement()
+    input_values = [payload[key] for key in key_values]
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    connection = connect_db()
+    cursor = connection.cursor()
 
-    logger.debug(statement)
+    logger.debug(statement_values)
 
     try:
-        cursor.execute(statement)
+        cursor.execute(statement_values, input_values)
 
-        conn.commit()
-        response = {'status': StatusCode.SUCCESS.value,
-                    'results': 'Registered new individual'}
+        # TODO: Update this endpoint so that it returns the user id if
+        # successful
+
+        connection.commit()
+        input_values = {'status': StatusCode.SUCCESS.value,
+                        'results': 'Registered new individual'}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
-        response = {'status': StatusCode.INTERNAL_ERROR.value,
-                    'error': str(error)}
-        conn.rollback()
+        connection.rollback()
+        logger.error(f'{endpoint} - error: {error}')
+        input_values = {'status': StatusCode.INTERNAL_ERROR.value,
+                        'error': str(error)}
+        connection.rollback()
 
     finally:
-        if conn is not None:
-            conn.close()
+        if connection is not None:
+            connection.close()
 
-    return jsonify(response)
+    return jsonify(input_values)
 
 ################################################################################
 ## USER AUTHENTICATION
@@ -174,25 +180,43 @@ def user_authentication():
 
     payload = request.get_json()
 
-    statement = """"""
+    statement = """
+                SELECT u.username, u.password, u.type
+                FROM vital_vue_user AS u
+                WHERE u.username = %s AND u.password = %s;
+                """
+    key_values = ['username', 'password']
+
+    response = validate_payload(payload, key_values)
+    if response:
+        return jsonify(response)
+
+    input_values = [payload[key] for key in key_values]
 
     conn = connect_db()
     cursor = conn.cursor()
 
     try:
-        cursor.execute(statement)
+        cursor.execute(statement, input_values)
+        rows = cursor.fetchall()
 
-        # TODO Authentication sql statement
-        access_token = create_access_token(identity=payload['username'])
-
-        response = {'status': StatusCode.SUCCESS.value,
-                    'results': access_token}
+        if rows:
+            row = rows[0]
+            access_token = create_access_token(identity=payload['username'],
+                                               additional_claims={
+                                                   'type': row[2]
+                                                   })
+            response = {'status': StatusCode.SUCCESS.value,
+                        'results': access_token}
+        else:
+            response = {'status': StatusCode.API_ERROR.value, 
+                        'results': 'Invalid authentication credentials'}
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'PUT {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value,
                     'error': str(error)}
-        
+
     finally:
         if conn is not None:
             conn.close()
