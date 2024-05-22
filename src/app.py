@@ -40,6 +40,7 @@ from StatusCode import StatusCode
 from IndividualTypes import IndividualTypes
 
 import logging
+from logging.config import fileConfig
 import psycopg2
 
 CONFIG = dotenv_values('.env')
@@ -52,8 +53,9 @@ app.config['SECRET_KEY'] = 'secret_key' #TODO Create config setting for secret k
 app.config['JWT_SECRET_KEY'] = 'secret_key' #TODO Create config setting for jwt secret key
 jwt = JWTManager(app)
 
-# declare logger
-logger = logging.getLogger('logger')
+fileConfig('logging_config.ini')
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 def connect_db(
         *,
@@ -110,7 +112,8 @@ def landing_page():
 
 @app.route('/register/<registration_type>/', methods=['POST'])
 def register(registration_type: str):
-    logger.info(f'POST {request.path}')
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     payload = request.get_json()
 
@@ -119,6 +122,8 @@ def register(registration_type: str):
     #                    'error': 'Invalid registration type'})
 
     individual = IndividualTypes(registration_type)
+    logging.debug(individual.value)
+
     values = individual.get_values()
     response = validate_payload(payload, values)
 
@@ -131,7 +136,7 @@ def register(registration_type: str):
     conn = connect_db()
     cursor = conn.cursor()
 
-    print(statement)
+    logger.debug(statement)
 
     try:
         cursor.execute(statement)
@@ -287,7 +292,7 @@ def see_appointments(patient_user_id):
 @app.route('/surgery/<hospitalization_id>/', methods = ['POST'])
 @jwt_required()
 def schedule_surgery(hospitalization_id):
-    logger.info(f'POST {request.path}')
+    logger.info(f'{request.method} {request.path}')
 
     token = get_jwt()
     identity = get_jwt_identity()
