@@ -114,19 +114,18 @@ def register(registration_type: str):
 
     payload = request.get_json()
 
-    #if registration_type not in IndividualTypes:
-    #    return jsonify({'status': StatusCode.API_ERROR.value,
-    #                    'error': 'Invalid registration type'})
+    if registration_type not in IndividualTypes:
+        return jsonify({'status': StatusCode.API_ERROR.value,
+                        'error': 'Invalid registration type'})
 
     individual = IndividualTypes(registration_type)
-    values = individual.get_values()
-    response = validate_payload(payload, values)
-
+    key_values = individual.get_values()
+    response = validate_payload(payload, key_values)
     if response:
         return jsonify(response)
 
     statement = individual.sql_insert_statement()
-    input_values = [payload[key] for key in values]
+    input_values = [payload[key] for key in key_values]
 
     conn = connect_db()
     cursor = conn.cursor()
@@ -141,10 +140,10 @@ def register(registration_type: str):
                     'results': 'Registered new individual'}
 
     except (Exception, psycopg2.DatabaseError) as error:
+        conn.rollback()
         logger.error(f'POST {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value,
                     'error': str(error)}
-        conn.rollback()
 
     finally:
         if conn is not None:
@@ -174,12 +173,13 @@ def user_authentication():
                 FROM vital_vue_user AS u
                 WHERE u.username = %s AND u.password = %s;
                 """
-    values = ['username', 'password']
-    input_values = [payload[key] for key in values]
+    key_values = ['username', 'password']
 
-    response = validate_payload(payload, values)
+    response = validate_payload(payload, key_values)
     if response:
         return jsonify(response)
+    
+    input_values = [payload[key] for key in key_values]
 
     conn = connect_db()
     cursor = conn.cursor()
@@ -190,12 +190,13 @@ def user_authentication():
 
         if rows:
             row = rows[0]
-            access_token = create_access_token(identity=payload['username'])
+            access_token = create_access_token(identity=payload['username'], 
+                                               additional_claims={'type': row[2]})
             response = {'status': StatusCode.SUCCESS.value,
                         'results': access_token}
         else:
             response = {'status': StatusCode.API_ERROR.value, 
-                        'results': 'Invalid login credentials'}
+                        'results': 'Invalid authentication credentials'}
             
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'PUT {request.path} - error: {error}')
@@ -223,14 +224,22 @@ def schedule_appointment():
     identity = get_jwt_identity()
     payload = request.get_json()
 
+    statement = """
+
+                """
+    key_values = ['doctor_id', 'date']
+
+    response = validate_payload(payload, key_values)
+    if response:
+        return jsonify(response)
+    
+    input_values = [payload[key] for key in key_values]
+
     conn = connect_db()
     cursor = conn.cursor()
 
-    statement = ""
-    values = ""
-
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement, input_values)
 
         results = []
         response = {'status': StatusCode.SUCCESS.value, 
@@ -271,6 +280,9 @@ def see_appointments(patient_user_id):
 
     conn = connect_db()
     cursor = conn.cursor()
+
+    print("Username: " + identity)
+    print("Role: " + token.get('type'))
 
     try:
         cursor.execute(statement, statement_values)
@@ -344,16 +356,16 @@ def get_prescriptions(person_id):
 
     token = get_jwt()
     identity = get_jwt_identity()
-    payload = request.get_json()
+
+    statement = """
+                    
+                """
 
     conn = connect_db()
     cursor = conn.cursor()
 
-    statement = ""
-    values = ""
-
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement)
         rows = cursor.fetchall()
 
         results = []
@@ -372,8 +384,6 @@ def get_prescriptions(person_id):
         if conn is not None:
             conn.close()
 
-    response = {'status': StatusCode.SUCCESS.value}
-
     return jsonify(response)
 
 ################################################################################
@@ -390,6 +400,11 @@ def add_prescription():
     token = get_jwt()
     identity = get_jwt_identity()
     payload = request.get_json()
+
+    if token.get('type') != 'doctor':
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'Only doctors can add prescriptions to a patient'}
+        return jsonify(response)
 
     conn = connect_db()
     cursor = conn.cursor()
