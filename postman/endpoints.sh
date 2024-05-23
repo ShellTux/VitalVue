@@ -2,7 +2,7 @@
 set -e
 
 all_endpoints() {
-	printf ''
+	echo 'register/doctor/'
 }
 
 usage() {
@@ -37,6 +37,15 @@ do
 	(
 	set -xe
 	case "$arg" in
+		register/doctor/)
+			curlie post "$url" \
+				contract_details="doctor graduated at University of Coimbra" \
+				email="$email" \
+				license="$license_key" \
+				name="$name" \
+				password="$password" \
+				username="$user_name"
+			;;
 		*) usage ;;
 	esac
 	)
