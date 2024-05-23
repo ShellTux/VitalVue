@@ -86,7 +86,7 @@ def validate_payload(payload, values):
 
 @app.route('/')
 def landing_page():
-    return """<!DOCTYPE html>
+    return r"""<!DOCTYPE html>
 <html>
 <body>
     <pre style="font-size: 20px;">
