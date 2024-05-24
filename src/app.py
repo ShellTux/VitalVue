@@ -281,10 +281,14 @@ def see_appointments(patient_user_id):
         cursor.execute(statement, statement_values)
         rows = cursor.fetchall()
 
-        results = []
-        for row in rows:
-            content = {'id': row[0], 'doctor_id': row[1], 'date': row[2]}
-            results.append(content)
+        if rows:
+            results = []
+            for row in rows:
+                content = {'id': row[0], 'doctor_id': row[1], 'date': row[2]}
+                results.append(content)
+        else:
+            results = 'No appointments available'
+            
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
 
