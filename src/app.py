@@ -284,12 +284,12 @@ def see_appointments(patient_user_id):
     type = get_jwt().get('type')
 
     # 2. check if endpoint is accessible to caller
-    allowed = ['assistant', 'patient']
+    allowed = [IndividualTypes.ASSISTANT, IndividualTypes.PATIENT]
     if type not in allowed:
         response = {'status': StatusCode.API_ERROR.value, 
                     'errors': "You don't have permission to see patient appointments"}
         return jsonify(response)
-    if type == 'patient' and id != patient_user_id:
+    if type == IndividualTypes.PATIENT and id != patient_user_id:
         response = {'status': StatusCode.API_ERROR.value, 
                     'errors': 'You are not the target patient'}
         return jsonify(response)
