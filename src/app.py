@@ -363,15 +363,28 @@ def schedule_surgery(hospitalization_id):
 def get_prescriptions(person_id):
     logger.info(f'GET {request.path}')
 
-    token = get_jwt()
-    identity = get_jwt_identity()
-    payload = request.get_json()
+    # 1. get token data
+    id = get_jwt_identity()
+    type = get_jwt().get('type')
 
+    # 2. check if patient is target patient
+    if type == 'patient':
+        if id != person_id:
+            response = {'status': StatusCode.API_ERROR.value, 
+                        'errors': 'Only the target patient can use this endpoint'}
+            return jsonify(response)
+
+    # 3. query statement and values
+    statement = """
+                SELECT * 
+                FROM 
+                WHERE 
+                """
+    values = (person_id,)
+    
+    # 4. connect to database
     conn = connect_db()
     cursor = conn.cursor()
-
-    statement = ""
-    values = ""
 
     try:
         cursor.execute(statement, values)
@@ -379,8 +392,8 @@ def get_prescriptions(person_id):
 
         results = []
         for row in rows:
-            results.append({})
-
+            content = {}
+            results.append(content)
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
 
@@ -392,8 +405,6 @@ def get_prescriptions(person_id):
     finally:
         if conn is not None:
             conn.close()
-
-    response = {'status': StatusCode.SUCCESS.value}
 
     return jsonify(response)
 
