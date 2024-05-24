@@ -9,6 +9,7 @@ OPEN                = xdg-open
 PRESENTATION        = presentation.pdf
 REPORT              = relatorio.pdf
 USER_MANUAL         = user-manual.pdf
+PANDOC_DATA_DIR     = pandoc
 PANDOC_OPTS         = \
 		      --variable=theme:Warsaw \
 		      --highlight-style=assets/onehalfdark.theme
@@ -19,14 +20,20 @@ PIP        := ./$(VENV)/bin/pip
 PRE_COMMIT := ./$(VENV)/bin/pre-commit
 PYTHON     := ./$(VENV)/bin/python3
 
+ifneq ($(wildcard $(PANDOC_DATA_DIR)),)
+	PANDOC_OPTS += \
+		       $(foreach filter,\
+		       $(wildcard $(PANDOC_DATA_DIR)/filters/*.lua),\
+		       --lua-filter=$(filter))
+endif
+
 all: $(VENV) $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL) $(PRESENTATION)
 
 $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL): %.pdf: docs/%.md
-	sed 's|/assets|assets|g' $< | pandoc --output=$@ --from=markdown
+	pandoc $(PANDOC_OPTS) --output=$@ $<
 
 $(PRESENTATION): %.pdf: docs/%.md
-	sed 's|/assets|assets|g' $< \
-		| pandoc $(PANDOC_OPTS) --output=$@ --from=markdown --to=beamer
+	pandoc $(PANDOC_OPTS) --output=$@ --from=markdown --to=beamer
 
 .PHONY: archive
 archive: $(ARCHIVE)
