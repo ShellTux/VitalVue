@@ -423,7 +423,13 @@ def add_prescription():
 
     # 4. query statement and key values
     statement = """
-                
+                INSERT INTO
+                    prescription (
+                    
+                    )
+                VALUES (
+                    
+                )
                 """
     key_values = ['type', 'event_id', 'validity', 'medicines']
 
