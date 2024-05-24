@@ -396,7 +396,8 @@ def get_prescriptions(person_id):
         if rows:
             results = []
             for row in rows:
-                content = {'prescription_id': row[0], 'validity_date': row[1]}
+                content = {'prescription_id': row[0], 
+                           'validity_date': row[1]}
                 results.append(content)
         else:
             results = 'This patient has no prescriptions'
