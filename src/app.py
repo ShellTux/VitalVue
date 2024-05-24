@@ -393,10 +393,14 @@ def get_prescriptions(person_id):
         cursor.execute(statement, values)
         rows = cursor.fetchall()
 
-        results = []
-        for row in rows:
-            content = {'prescription_id': row[0], 'validity_date': row[1]}
-            results.append(content)
+        if rows:
+            results = []
+            for row in rows:
+                content = {'prescription_id': row[0], 'validity_date': row[1]}
+                results.append(content)
+        else:
+            results = 'This patient has no prescriptions'
+        
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
 
