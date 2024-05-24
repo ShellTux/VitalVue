@@ -296,10 +296,10 @@ def see_appointments(patient_user_id):
             
     # 3. query statement and key values
     statement = """
-                SELECT   
-                      ap.id
-                    , ap.doctor_employee_vital_vue_user_id
-                    , ap.scheduled_date
+                SELECT 
+                    ap.id,
+                    ap.doctor_employee_vital_vue_user_id,
+                    ap.scheduled_date
                 FROM 
                     appointment AS ap
                 WHERE 
