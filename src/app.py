@@ -184,9 +184,12 @@ def user_authentication():
 
     # 2. query statement and key values
     statement = """
-                SELECT u.id, u.type
-                FROM vital_vue_user AS u
-                WHERE u.username = %s AND u.password = %s;
+                SELECT 
+                    u.id, u.type
+                FROM 
+                    vital_vue_user AS u
+                WHERE 
+                    u.username = %s AND u.password = %s;
                 """
     key_values = ['username', 'password']
 
