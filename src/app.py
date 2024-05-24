@@ -185,11 +185,13 @@ def user_authentication():
     # 2. query statement and key values
     statement = """
                 SELECT 
-                    u.id, u.type
+                    u.id, 
+                    u.type
                 FROM 
                     vital_vue_user AS u
                 WHERE 
-                    u.username = %s AND u.password = %s;
+                    u.username = %s 
+                    AND u.password = %s;
                 """
     key_values = ['username', 'password']
 
