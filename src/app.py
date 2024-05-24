@@ -153,7 +153,6 @@ def register(registration_type: str):
         connection.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
-        connection.rollback()
         logger.error(f'{endpoint} - error: {error}')
         input_values = {'status': StatusCode.INTERNAL_ERROR.value,
                         'error': str(error)}
