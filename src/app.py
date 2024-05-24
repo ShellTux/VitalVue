@@ -117,7 +117,7 @@ def register(registration_type: str):
     endpoint = f'{request.method} {request.path}'
     logger.info(endpoint)
 
-    # 1. get payload
+    # 1. get request payload
     payload = request.get_json()
 
     # 2. validate registration type
@@ -179,21 +179,26 @@ def register(registration_type: str):
 def user_authentication():
     logger.info(f'PUT {request.path}')
 
+    # 1. get request payload
     payload = request.get_json()
 
+    # 2. query statement and key values
     statement = """
-                SELECT u.username, u.password, u.type
+                SELECT u.id, u.type
                 FROM vital_vue_user AS u
                 WHERE u.username = %s AND u.password = %s;
                 """
     key_values = ['username', 'password']
 
+    # 3. validate payload
     response = validate_payload(payload, key_values)
     if response:
         return jsonify(response)
 
+    # 5. get input values from payload
     input_values = [payload[key] for key in key_values]
 
+    # 6. connect to database
     conn = connect_db()
     cursor = conn.cursor()
 
@@ -203,9 +208,9 @@ def user_authentication():
 
         if rows:
             row = rows[0]
-            access_token = create_access_token(identity=payload['username'],
-                                               additional_claims={
-                                                   'type': row[2]
+            access_token = create_access_token(identity = row[0],
+                                               additional_claims = {
+                                                   'type': row[1]
                                                    })
             response = {'status': StatusCode.SUCCESS.value,
                         'results': access_token}
