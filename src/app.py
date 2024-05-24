@@ -376,9 +376,12 @@ def get_prescriptions(person_id):
 
     # 3. query statement and values
     statement = """
-                SELECT p.prescription_id, p.validity_date
-                FROM prescription AS p
-                WHERE p.patient_vital_vue_user_id = %s
+                SELECT 
+                    p.prescription_id, p.validity_date
+                FROM 
+                    prescription AS p
+                WHERE 
+                    p.patient_vital_vue_user_id = %s
                 """
     values = (person_id,)
     
@@ -392,7 +395,7 @@ def get_prescriptions(person_id):
 
         results = []
         for row in rows:
-            content = {}
+            content = {'prescription_id': row[0], 'validity_date': row[1]}
             results.append(content)
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
