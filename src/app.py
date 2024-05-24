@@ -377,7 +377,8 @@ def get_prescriptions(person_id):
     # 3. query statement and values
     statement = """
                 SELECT 
-                    p.prescription_id, p.validity_date
+                    p.prescription_id, 
+                    p.validity_date
                 FROM 
                     prescription AS p
                 WHERE 
