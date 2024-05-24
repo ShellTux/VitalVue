@@ -345,11 +345,18 @@ def schedule_surgery(hospitalization_id):
                         doctor_employee_vital_vue_user_id,
                         scheduled_date,
                         start_time,
-                        end_time
+                        end_time,
+                        hospitalization_id
                     )
                 VALUES (
-                    %s, %s, %s, %s, %s
-                );
+                    %s, %s, %s, %s, %s, %s
+                )
+                RETURNING 
+                    hospitalization_id,
+                    id,
+                    patient_vital_vue_user_id,
+                    doctor_employee_vital_vue_user_id,
+                    scheduled_date;
                 """
     key_values = ['patient_user_id', 'doctor_user_id', 
                   'date', 'start_time', 'end_time']
@@ -363,6 +370,8 @@ def schedule_surgery(hospitalization_id):
     payload['start_time'] = payload['date'] + ' ' + payload['start_time']
     payload['end_time'] = payload['date'] + ' ' + payload['end_time']
     input_values = [payload[key] for key in key_values]
+    if hospitalization_id is not None:
+        input_values.append(hospitalization_id)
 
     # 7. connect to database
     conn = connect_db()
@@ -370,11 +379,12 @@ def schedule_surgery(hospitalization_id):
 
     try:
         cursor.execute(statement, input_values)
-        results = {'hospitalization_id': '',
-                   'surgery_id': '',
-                   'patient_id': '',
-                   'doctor_id': '',
-                   'date': ''}
+        row = cursor.fetchone()[0]
+        results = {'hospitalization_id': row[0],
+                   'surgery_id': row[1],
+                   'patient_id': row[2],
+                   'doctor_id': row[3],
+                   'date': row[4]}
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
         conn.commit()
