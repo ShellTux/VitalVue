@@ -61,7 +61,7 @@ flask: $(VENV)
 	(. $(ENV_FILE) && $(FLASK) $(FLASK_OPTS) run $(FLASK_RUN_OPTS))
 
 .PHONY: dev
-dev:
+dev: $(VENV)
 	sudo docker compose up --detach
 	sleep 3
 	(. $(ENV_FILE) && $(OPEN) "http://$$SERVER_HOST:$$PGADMIN_DEFAULT_PORT")
