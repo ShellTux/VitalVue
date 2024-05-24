@@ -279,17 +279,35 @@ def schedule_appointment():
 def see_appointments(patient_user_id):
     logger.info(f'GET {request.path}')
 
-    token = get_jwt()
-    identity = get_jwt_identity()
-    payload = request.get_json()
+    # 1. get token data
+    id = get_jwt_identity()
+    type = get_jwt().get('type')
 
+    # 2. check if endpoint is accessible to caller
+    allowed = [IndividualTypes.ASSISTANT, IndividualTypes.PATIENT]
+    if type not in allowed:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': "You don't have permission to see patient appointments"}
+        return jsonify(response)
+    if type == IndividualTypes.PATIENT and id != patient_user_id:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'You are not the target patient'}
+        return jsonify(response)
+            
+    # 3. query statement and key values
     statement = """
-                    SELECT *
-                    FROM appointment AS ap
-                    WHERE ap.patient_id = %s
+                SELECT   
+                      ap.id
+                    , ap.doctor_employee_vital_vue_user_id
+                    , ap.scheduled_date
+                FROM 
+                    appointment AS ap
+                WHERE 
+                    ap.patient_vital_vue_user_id = %s
                 """
     statement_values = (patient_user_id,)
 
+    # 4. connect to database
     conn = connect_db()
     cursor = conn.cursor()
 
@@ -297,7 +315,16 @@ def see_appointments(patient_user_id):
         cursor.execute(statement, statement_values)
         rows = cursor.fetchall()
 
-        response = {'status': StatusCode.SUCCESS.value}
+        if rows:
+            results = []
+            for row in rows:
+                content = {'id': row[0], 'doctor_id': row[1], 'date': row[2]}
+                results.append(content)
+        else:
+            results = 'No available appointments'
+
+        response = {'status': StatusCode.SUCCESS.value, 
+                    'results': results}
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'GET {request.path} - error: {error}')
@@ -307,8 +334,6 @@ def see_appointments(patient_user_id):
     finally:
         if conn is not None:
             conn.close()
-
-    response = {'status': StatusCode.SUCCESS.value}
 
     return jsonify(response)
 
