@@ -29,7 +29,7 @@ CREATE TABLE patient (
 );
 
 CREATE TABLE appointment (
-	id					 BIGINT,
+	id					 BIGSERIAL,
 	scheduled_date			 DATE NOT NULL,
 	start_time				 TIMESTAMP NOT NULL,
 	end_time				 TIMESTAMP NOT NULL,
