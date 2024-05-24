@@ -67,8 +67,12 @@ CREATE TABLE nurse_role (
 );
 
 CREATE TABLE prescription (
-	hospitalization_id BIGINT NOT NULL,
-	appointment_id	 BIGINT NOT NULL
+	id			 BIGINT,
+	validity_date		 DATE NOT NULL,
+	patient_vital_vue_user_id BIGINT NOT NULL,
+	hospitalization_id	 BIGINT NOT NULL,
+	appointment_id		 BIGINT NOT NULL,
+	PRIMARY KEY(id)
 );
 
 CREATE TABLE medication (
@@ -112,8 +116,9 @@ CREATE TABLE payment (
 );
 
 CREATE TABLE medication_dosage (
-	dosage	 BIGINT NOT NULL,
-	medication_id BIGINT,
+	dosage		 BIGINT NOT NULL,
+	prescription_id BIGINT NOT NULL,
+	medication_id	 BIGINT,
 	PRIMARY KEY(medication_id)
 );
 
@@ -163,13 +168,15 @@ ALTER TABLE hospitalization ADD CONSTRAINT hospitalization_fk3 FOREIGN KEY (nurs
 ALTER TABLE nurse_role ADD CONSTRAINT nurse_role_fk1 FOREIGN KEY (appointment_id) REFERENCES appointment(id);
 ALTER TABLE nurse_role ADD CONSTRAINT nurse_role_fk2 FOREIGN KEY (nurse_employee_vital_vue_user_id) REFERENCES nurse(employee_vital_vue_user_id);
 ALTER TABLE nurse_role ADD CONSTRAINT nurse_role_fk3 FOREIGN KEY (surgery_id) REFERENCES surgery(id);
-ALTER TABLE prescription ADD CONSTRAINT prescription_fk1 FOREIGN KEY (hospitalization_id) REFERENCES hospitalization(id);
-ALTER TABLE prescription ADD CONSTRAINT prescription_fk2 FOREIGN KEY (appointment_id) REFERENCES appointment(id);
+ALTER TABLE prescription ADD CONSTRAINT prescription_fk1 FOREIGN KEY (patient_vital_vue_user_id) REFERENCES patient(vital_vue_user_id);
+ALTER TABLE prescription ADD CONSTRAINT prescription_fk2 FOREIGN KEY (hospitalization_id) REFERENCES hospitalization(id);
+ALTER TABLE prescription ADD CONSTRAINT prescription_fk3 FOREIGN KEY (appointment_id) REFERENCES appointment(id);
 ALTER TABLE med_occ_sev ADD CONSTRAINT med_occ_sev_fk1 FOREIGN KEY (side_effect_effect) REFERENCES side_effect(effect);
 ALTER TABLE med_occ_sev ADD CONSTRAINT med_occ_sev_fk2 FOREIGN KEY (medication_id) REFERENCES medication(id);
 ALTER TABLE payment ADD CONSTRAINT payment_fk1 FOREIGN KEY (patient_vital_vue_user_id) REFERENCES patient(vital_vue_user_id);
 ALTER TABLE payment ADD CONSTRAINT payment_fk2 FOREIGN KEY (bill_id) REFERENCES bill(id);
-ALTER TABLE medication_dosage ADD CONSTRAINT medication_dosage_fk1 FOREIGN KEY (medication_id) REFERENCES medication(id);
+ALTER TABLE medication_dosage ADD CONSTRAINT medication_dosage_fk1 FOREIGN KEY (prescription_id) REFERENCES prescription(id);
+ALTER TABLE medication_dosage ADD CONSTRAINT medication_dosage_fk2 FOREIGN KEY (medication_id) REFERENCES medication(id);
 ALTER TABLE vital_vue_user ADD UNIQUE (username, email);
 ALTER TABLE hospitalization_bill ADD UNIQUE (bill_id);
 ALTER TABLE hospitalization_bill ADD CONSTRAINT hospitalization_bill_fk1 FOREIGN KEY (hospitalization_id) REFERENCES hospitalization(id);
