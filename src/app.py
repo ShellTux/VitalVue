@@ -324,27 +324,66 @@ def see_appointments(patient_user_id):
 def schedule_surgery(hospitalization_id):
     logger.info(f'{request.method} {request.path}')
 
-    token = get_jwt()
-    identity = get_jwt_identity()
+    # 1. get token data
+    id = get_jwt_identity()
+    type = get_jwt().get('type')
+
+    # 2. validate caller
+    if type != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'Only assistants can use this endpoint'}
+        return jsonify(response)
+    
+    # 3. get request payload
     payload = request.get_json()
 
+    # 4. query statement and key values
+    statement = """
+                INSERT INTO 
+                    surgery (
+                        patient_vital_vue_user_id,
+                        doctor_employee_vital_vue_user_id,
+                        scheduled_date,
+                        start_time,
+                        end_time
+                    )
+                VALUES (
+                    %s, %s, %s, %s, %s
+                );
+                """
+    key_values = ['patient_user_id', 'doctor_user_id', 
+                  'date', 'start_time', 'end_time']
+
+    # 5. validate payload
+    response = validate_payload(payload, key_values)
+    if response:
+        return jsonify(response)
+    
+    # 6. get input values
+    payload['start_time'] = payload['date'] + ' ' + payload['start_time']
+    payload['end_time'] = payload['date'] + ' ' + payload['end_time']
+    input_values = [payload[key] for key in key_values]
+
+    # 7. connect to database
     conn = connect_db()
     cursor = conn.cursor()
 
-    statement = ""
-    values = ""
-
     try:
-        cursor.execute(statement, values)
-
-        results = []
+        cursor.execute(statement, input_values)
+        results = {'hospitalization_id': '',
+                   'surgery_id': '',
+                   'patient_id': '',
+                   'doctor_id': '',
+                   'date': ''}
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
+        conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'POST {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
+        conn.rollback()
 
     finally:
         if conn is not None:
