@@ -408,27 +408,49 @@ def get_prescriptions(person_id):
 def add_prescription():
     logger.info(f'POST {request.path}')
 
-    token = get_jwt()
-    identity = get_jwt_identity()
+    # 1. get token data
+    id = get_jwt_identity()
+    type = get_jwt().get('type')
+
+    # 2. validate caller
+    if type != IndividualTypes.DOCTOR:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'Only doctors can access this endpoint'}
+        return jsonify(response)
+    
+    # 3. get request payload
     payload = request.get_json()
 
+    # 4. query statement and key values
+    statement = """
+                
+                """
+    key_values = ['type', 'event_id', 'validity', 'medicines']
+
+    # 5. validate payload
+    response = validate_payload(payload, key_values)
+    if response:
+        return jsonify(response)
+    
+    # 6. get input values
+    input_values = [payload[key] for key in key_values]
+
+    # connect to database
     conn = connect_db()
     cursor = conn.cursor()
 
-    statement = ""
-    values = ""
-
     try:
-        cursor.execute(statement, values)
-
-        results = []
+        cursor.execute(statement, input_values)
+        prescription_id = cursor.fetchone()[0]
         response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+                    'results': prescription_id}
+        conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'POST {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
+        conn.rollback()
 
     finally:
         if conn is not None:
