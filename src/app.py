@@ -117,38 +117,40 @@ def register(registration_type: str):
     endpoint = f'{request.method} {request.path}'
     logger.info(endpoint)
 
+    # 1. get payload
     payload = request.get_json()
 
-    if registration_type not in IndividualTypes:
-       return jsonify({'status': StatusCode.API_ERROR.value,
-                       'error': 'Invalid registration type'})
+    # 2. validate registration type
+    #if registration_type not in IndividualTypes:
+    #   return jsonify({'status': StatusCode.API_ERROR.value,
+    #                   'error': 'Invalid registration type'})
 
+    # 3. get individual statement and key values
     individual = IndividualTypes(registration_type)
     logging.debug(individual.value)
-
+    statement = individual.sql_insert_statement()
     key_values = individual.get_values()
-    input_values = validate_payload(payload, key_values)
 
-    if input_values:
+    # 4. validate payload
+    response = validate_payload(payload, key_values)
+    if response:
         return jsonify(input_values)
 
-    statement_values = individual.sql_insert_statement()
+    # 5. get input values from payload
     input_values = [payload[key] for key in key_values]
 
+    # 6. connect to database
     connection = connect_db()
     cursor = connection.cursor()
 
-    logger.debug(statement_values)
+    logger.debug(statement)
 
     try:
-        cursor.execute(statement_values, input_values)
-
-        # TODO: Update this endpoint so that it returns the user id if
-        # successful
-
-        connection.commit()
+        cursor.execute(statement, input_values)
+        user_id = cursor.fetchone()[0]
         input_values = {'status': StatusCode.SUCCESS.value,
-                        'results': 'Registered new individual'}
+                        'results': user_id}
+        connection.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
         connection.rollback()
