@@ -42,6 +42,7 @@ from IndividualTypes import IndividualTypes
 import logging
 from logging.config import fileConfig
 import psycopg2
+import hashlib
 
 CONFIG = dotenv_values('.env')
 
@@ -81,6 +82,11 @@ def validate_payload(payload, values):
             return {'status': StatusCode.API_ERROR.value,
                     'results': f'{value} value not in payload'}
     return {}
+
+def hash_password(password):
+    password_bytes = password.encode()
+    encoded = hashlib.md5(password_bytes)
+    return encoded.hexdigest()
 
 ################################################################################
 ## LANDING PAGE
@@ -137,6 +143,7 @@ def register(registration_type: str):
         return jsonify(input_values)
 
     # 5. get input values from payload
+    payload['password'] = hash_password(payload['password'])
     input_values = [payload[key] for key in key_values]
 
     # 6. connect to database
@@ -201,6 +208,7 @@ def user_authentication():
         return jsonify(response)
 
     # 5. get input values from payload
+    payload['password'] = hash_password(payload['password'])
     input_values = [payload[key] for key in key_values]
 
     # 6. connect to database
