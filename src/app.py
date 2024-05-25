@@ -670,25 +670,30 @@ def daily_summary(year_month_day: str):
                     'errors': "You don't have permission to see daily summary"}
         return jsonify(response)
 
+    # TODO: This sql statement gives all results grouped by date, not by the
+    # given day.
     statement = '''
         SELECT
-            surgery.start_time AS "Day",
-            COUNT(hospitalization.id) AS "Hospitalizations",
+            SUM(payment.amount) AS "Amount Spent",
             COUNT(surgery.id) AS "Surgeries",
-            COUNT(payment.id) AS "Payments",
-            COUNT(CASE WHEN bill.paid = FALSE THEN 1 ELSE NULL END) AS "Unpaid Bills"
+            COUNT(prescription.id) AS Prescriptions
         FROM
-            hospitalization hospitalization
+            hospitalization
         LEFT JOIN
-            surgery surgery ON hospitalization.id = surgery.hospitalization_id
+            hospitalization_bill ON hospitalization.id = hospitalization_bill.hospitalization_id
         LEFT JOIN
-            payment payment ON hospitalization.id = surgery.hospitalization_id
+            bill ON hospitalization_bill.bill_id = bill.id
         LEFT JOIN
-            bill ON payment.bill_id = bill.id
+            payment ON bill.id = payment.bill_id
+        LEFT JOIN
+            surgery ON hospitalization.id = surgery.hospitalization_id
+        LEFT JOIN
+            prescription ON hospitalization.id = prescription.hospitalization_id
+        WHERE
+            hospitalization.assistant_employee_vital_vue_user_id IN (SELECT employee_vital_vue_user_id FROM assistant)
         GROUP BY
-            surgery.start_time;
+            date(scheduled_date);
     '''
-
     connection = connect_db()
     cursor = connection.cursor()
 
@@ -698,11 +703,9 @@ def daily_summary(year_month_day: str):
 
         if len(rows) == 0:
             results = list(map(lambda row: {
-                    'day': row[0],
-                    'hospitalizations': row[1],
-                    'surgeries': row[2],
-                    'payments': row[3],
-                    'unpaid_bills': row[4]
+                'amount_spent': row[0],
+                'surgeries': row[1],
+                'prescriptions': row[2]
                 }, rows))
         else:
             results = 'No available hospitalizations'
