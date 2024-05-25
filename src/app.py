@@ -266,7 +266,8 @@ def schedule_appointment():
                 VALUES (
                     %s, %s, %s, %s, %s
                 )
-                RETURNING id;
+                RETURNING 
+                    id;
                 """
     key_values = ['doctor_id', 'date', 
                   'start_time', 'end_time']
