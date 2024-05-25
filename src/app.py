@@ -368,11 +368,9 @@ def get_prescriptions(person_id):
     type = get_jwt().get('type')
 
     # 2. check if patient is target patient
-    if type == 'patient':
-        if id != person_id:
-            response = {'status': StatusCode.API_ERROR.value, 
-                        'errors': 'Only the target patient can use this endpoint'}
-            return jsonify(response)
+    if type == IndividualTypes.PATIENT and id != person_id:
+        return jsonify({'status': StatusCode.API_ERROR.value, 
+                        'errors': 'Only the target patient can use this endpoint'})
 
     # 3. query statement and values
     statement = """
