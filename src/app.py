@@ -339,26 +339,48 @@ def schedule_surgery(hospitalization_id):
 
     # 4. query statement and key values
     statement = """
-                INSERT INTO 
-                    surgery (
-                        patient_vital_vue_user_id,
-                        doctor_employee_vital_vue_user_id,
-                        scheduled_date,
-                        start_time,
-                        end_time,
-                        hospitalization_id
+                WITH new_surgery AS (
+                    INSERT INTO 
+                        surgery (
+                            patient_vital_vue_user_id,
+                            doctor_employee_vital_vue_user_id,
+                            scheduled_date,
+                            start_time,
+                            end_time,
+                            hospitalization_id
+                        )
+                    VALUES (
+                        %s, %s, %s, %s, %s, %s
                     )
-                VALUES (
-                    %s, %s, %s, %s, %s, %s
+                    RETURNING
+                        id
                 )
-                RETURNING 
+                INSERT INTO 
+                    nurse_role (
+                        surgery_id,
+                        nurse_employee_vital_vue_user_id,
+                        role
+                    )
+                SELECT
+                    id,
+                    nurse_employee_vital_vue_user_id,
+                    role
+                FROM 
+                    new_surgery (
+                        VALUES (
+                            %s, %s
+                        )
+                    );
+                SELECT 
                     hospitalization_id,
                     id,
                     patient_vital_vue_user_id,
                     doctor_employee_vital_vue_user_id,
-                    scheduled_date;
+                    scheduled_date
+                FROM
+                    new_surgery;
                 """
-    key_values = ['patient_user_id', 'doctor_user_id', 
+    key_values = ['patient_user_id', 'doctor_user_id', 'nurses', 
                   'date', 'start_time', 'end_time']
     if hospitalization_id is None:
         # remove 'hospitalization_id' column from statement
