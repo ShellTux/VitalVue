@@ -1,1 +1,978 @@
-{"ENTITY_ID":17,"tables":[{"id":"6bb980dc-776c-4502-9bac-e0dc708bfef3","position":{"x":375,"y":93},"data":{"table_name":"Employee","fields":[{"fieldName":"name","fieldType":10,"isPK":false,"isNotNull":false,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false},{"fieldName":"contract details","fieldType":11,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":3,"checkName":[],"checkCondition":[]}},{"id":"a67efa48-1109-4e3f-9104-bb3723459178","position":{"x":-103,"y":579},"data":{"table_name":"Doctor","fields":[{"fieldName":"license","fieldType":11,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":2,"checkName":[],"checkCondition":[]}},{"id":"6e795459-cc08-4c30-9868-3c06b9dc0395","position":{"x":371,"y":389},"data":{"table_name":"Nurse","fields":[{"fieldName":"category","fieldType":11,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":2,"checkName":[],"checkCondition":[]}},{"id":"e77330bc-c019-4b25-9188-bcd5312b7a53","position":{"x":806,"y":580},"data":{"table_name":"Assistant","fields":[],"next_id":1,"checkName":[],"checkCondition":[]}},{"id":"3405ae89-726e-4000-9eb2-8fcdf3728e24","position":{"x":361,"y":1000},"data":{"table_name":"Patient","fields":[{"fieldName":"name","fieldType":10,"isPK":false,"isNotNull":false,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":2,"checkName":[],"checkCondition":[]}},{"id":"85e5fb63-1f42-4034-9fce-9f0b3c38e9a2","position":{"x":-102,"y":782},"data":{"table_name":"Appointment","fields":[{"fieldName":"id","fieldType":3,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":[1,1],"isAutoIncrement":false},{"fieldName":"scheduled date","fieldType":7,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false},{"fieldName":"start time","fieldType":8,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false},{"fieldName":"end time","fieldType":8,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false}],"next_id":4,"checkName":[],"checkCondition":[]}},{"id":"d20ce8b8-ccb4-4d79-8ce2-5d17a579bad0","position":{"x":365,"y":780},"data":{"table_name":"Surgery","fields":[{"fieldName":"id","fieldType":3,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":[1,1],"isAutoIncrement":false},{"fieldName":"scheduled date","fieldType":7,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false},{"fieldName":"start time","fieldType":8,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false},{"fieldName":"end time","fieldType":8,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false}],"next_id":4,"checkName":[],"checkCondition":[]}},{"id":"3cb4d740-a72e-480b-b53b-03830b1cf871","position":{"x":817,"y":794},"data":{"table_name":"Hospitalization","fields":[{"fieldName":"id","fieldType":3,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":[1,1],"isAutoIncrement":false}],"next_id":1,"checkName":[],"checkCondition":[]}},{"id":"4f0c25a1-4cfa-4348-ac92-a82f78c9c3b8","position":{"x":372,"y":579},"data":{"table_name":"Nurse Role","fields":[{"fieldName":"role","fieldType":11,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":1,"checkName":[],"checkCondition":[]}},{"id":"bc6d7247-1c8d-42f9-b1d4-cd6ee6f70be7","position":{"x":-94,"y":975},"data":{"table_name":"Prescription","fields":[],"next_id":1,"checkName":[],"checkCondition":[]}},{"id":"7f7f4c43-ba07-44cd-8e3b-f5268c77711e","position":{"x":-523,"y":1097},"data":{"table_name":"Medication","fields":[{"fieldName":"id","fieldType":3,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":[1,1],"isAutoIncrement":false},{"fieldName":"name","fieldType":11,"isPK":false,"isNotNull":false,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":3,"checkName":[],"checkCondition":[]}},{"id":"fe7c193b-49c6-4200-b89f-191b7f844f9d","position":{"x":-517,"y":1471},"data":{"table_name":"Side Effect","fields":[{"fieldName":"effect","fieldType":11,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":1,"checkName":[],"checkCondition":[]}},{"id":"10c5680d-3b1b-4258-a71a-e8e0b1b91705","position":{"x":-522,"y":1287},"data":{"table_name":"Med Occ Sev","fields":[{"fieldName":"probability","fieldType":4,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":["8"],"isAutoIncrement":false},{"fieldName":"severity","fieldType":3,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false}],"next_id":2,"checkName":[],"checkCondition":[]}},{"id":"b1680620-9a59-4824-a83b-fca0004e2aee","position":{"x":-571,"y":569},"data":{"table_name":"specialization","fields":[{"fieldName":"field","fieldType":11,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":1,"checkName":[],"checkCondition":[]}},{"id":"1e0e191d-bbf0-404a-a2de-01e4d52d94a4","position":{"x":358,"y":1128},"data":{"table_name":"Bill","fields":[{"fieldName":"id","fieldType":3,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":[1,1],"isAutoIncrement":false},{"fieldName":"cost","fieldType":3,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false},{"fieldName":"paid","fieldType":0,"isPK":false,"isNotNull":false,"isUnique":false,"defaultValue":"","args":[1,1],"isAutoIncrement":false}],"next_id":3,"checkName":[],"checkCondition":[]}},{"id":"33060ba0-c9d0-43cc-959a-2002fa53fd82","position":{"x":816,"y":1130},"data":{"table_name":"Payment","fields":[{"fieldName":"id","fieldType":3,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":[1,1],"isAutoIncrement":false},{"fieldName":"pay date","fieldType":7,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false},{"fieldName":"amount","fieldType":3,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":false}],"next_id":3,"checkName":[],"checkCondition":[]}},{"id":"595722b8-0de4-4f7a-a9e5-448bf6828cd9","position":{"x":-518,"y":971},"data":{"table_name":"Medication Dosage","fields":[{"fieldName":"dosage","fieldType":3,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":[1,1],"isAutoIncrement":false}],"next_id":1,"checkName":[],"checkCondition":[]}},{"id":"a1d5e5fc-c789-495e-96d1-d8ab4adf1b24","position":{"x":1170,"y":74},"data":{"table_name":"Vital Vue User","fields":[{"fieldName":"id","fieldType":3,"isPK":true,"isNotNull":false,"isUnique":false,"defaultValue":"","args":"","isAutoIncrement":true},{"fieldName":"username","fieldType":11,"isPK":false,"isNotNull":true,"isUnique":true,"defaultValue":"","args":["512"],"isAutoIncrement":false},{"fieldName":"password","fieldType":11,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false},{"fieldName":"email","fieldType":11,"isPK":false,"isNotNull":true,"isUnique":true,"defaultValue":"","args":["512"],"isAutoIncrement":false},{"fieldName":"type","fieldType":10,"isPK":false,"isNotNull":true,"isUnique":false,"defaultValue":"","args":["512"],"isAutoIncrement":false}],"next_id":6,"checkName":[],"checkCondition":[]}}],"links":[{"source":"a67efa48-1109-4e3f-9104-bb3723459178","target":"6bb980dc-776c-4502-9bac-e0dc708bfef3","order":"parenting","sourceCard":"0:1","targetCard":"0:1","label":"complete","hierType":"complete","sourceisweak":false,"targetisweak":false},{"source":"6e795459-cc08-4c30-9868-3c06b9dc0395","target":"6bb980dc-776c-4502-9bac-e0dc708bfef3","order":"parenting","sourceCard":"0:1","targetCard":"0:1","label":"complete","hierType":"complete","sourceisweak":false,"targetisweak":false},{"source":"e77330bc-c019-4b25-9188-bcd5312b7a53","target":"6bb980dc-776c-4502-9bac-e0dc708bfef3","order":"parenting","sourceCard":"0:1","targetCard":"0:1","label":"complete","hierType":"complete","sourceisweak":false,"targetisweak":false},{"source":"a67efa48-1109-4e3f-9104-bb3723459178","target":"85e5fb63-1f42-4034-9fce-9f0b3c38e9a2","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"conducts","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"a67efa48-1109-4e3f-9104-bb3723459178","target":"d20ce8b8-ccb4-4d79-8ce2-5d17a579bad0","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"conducts","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"3cb4d740-a72e-480b-b53b-03830b1cf871","target":"6e795459-cc08-4c30-9868-3c06b9dc0395","order":"normal","sourceCard":"0:n","targetCard":"1:1","label":"is responsible","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"3cb4d740-a72e-480b-b53b-03830b1cf871","target":"d20ce8b8-ccb4-4d79-8ce2-5d17a579bad0","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"d20ce8b8-ccb4-4d79-8ce2-5d17a579bad0","target":"4f0c25a1-4cfa-4348-ac92-a82f78c9c3b8","order":"normal","sourceCard":"1:1","targetCard":"1:n","label":"assists","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"4f0c25a1-4cfa-4348-ac92-a82f78c9c3b8","target":"6e795459-cc08-4c30-9868-3c06b9dc0395","order":"normal","sourceCard":"0:n","targetCard":"1:1","label":"performs","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"85e5fb63-1f42-4034-9fce-9f0b3c38e9a2","target":"bc6d7247-1c8d-42f9-b1d4-cd6ee6f70be7","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"prescribes","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"3cb4d740-a72e-480b-b53b-03830b1cf871","target":"bc6d7247-1c8d-42f9-b1d4-cd6ee6f70be7","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"prescribes","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"7f7f4c43-ba07-44cd-8e3b-f5268c77711e","target":"10c5680d-3b1b-4258-a71a-e8e0b1b91705","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"with","hierType":null,"sourceisweak":false,"targetisweak":true},{"source":"10c5680d-3b1b-4258-a71a-e8e0b1b91705","target":"fe7c193b-49c6-4200-b89f-191b7f844f9d","order":"normal","sourceCard":"0:1","targetCard":"1:1","label":"with","hierType":null,"sourceisweak":true,"targetisweak":false},{"source":"a67efa48-1109-4e3f-9104-bb3723459178","target":"b1680620-9a59-4824-a83b-fca0004e2aee","order":"normal","sourceCard":"0:1","targetCard":"1:n","label":"specializes","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"b1680620-9a59-4824-a83b-fca0004e2aee","target":"b1680620-9a59-4824-a83b-fca0004e2aee","order":"normal","sourceCard":"0:n","targetCard":"0:1","label":"","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"85e5fb63-1f42-4034-9fce-9f0b3c38e9a2","target":"1e0e191d-bbf0-404a-a2de-01e4d52d94a4","order":"normal","sourceCard":"0:1","targetCard":"1:1","label":"generates","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"3cb4d740-a72e-480b-b53b-03830b1cf871","target":"1e0e191d-bbf0-404a-a2de-01e4d52d94a4","order":"normal","sourceCard":"0:1","targetCard":"0:1","label":"generates","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"1e0e191d-bbf0-404a-a2de-01e4d52d94a4","target":"33060ba0-c9d0-43cc-959a-2002fa53fd82","order":"normal","sourceCard":"1:1","targetCard":"1:n","label":"receives","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"e77330bc-c019-4b25-9188-bcd5312b7a53","target":"3cb4d740-a72e-480b-b53b-03830b1cf871","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"schedules","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"e77330bc-c019-4b25-9188-bcd5312b7a53","target":"85e5fb63-1f42-4034-9fce-9f0b3c38e9a2","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"schedules","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"3405ae89-726e-4000-9eb2-8fcdf3728e24","target":"33060ba0-c9d0-43cc-959a-2002fa53fd82","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"realizes","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"3405ae89-726e-4000-9eb2-8fcdf3728e24","target":"85e5fb63-1f42-4034-9fce-9f0b3c38e9a2","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"3405ae89-726e-4000-9eb2-8fcdf3728e24","target":"d20ce8b8-ccb4-4d79-8ce2-5d17a579bad0","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"3405ae89-726e-4000-9eb2-8fcdf3728e24","target":"3cb4d740-a72e-480b-b53b-03830b1cf871","order":"normal","sourceCard":"1:1","targetCard":"0:n","label":"","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"85e5fb63-1f42-4034-9fce-9f0b3c38e9a2","target":"4f0c25a1-4cfa-4348-ac92-a82f78c9c3b8","order":"normal","sourceCard":"1:1","targetCard":"1:n","label":"assists","hierType":null,"sourceisweak":false,"targetisweak":false},{"source":"bc6d7247-1c8d-42f9-b1d4-cd6ee6f70be7","target":"595722b8-0de4-4f7a-a9e5-448bf6828cd9","order":"normal","sourceCard":"1:1","targetCard":"1:n","label":"","hierType":null,"sourceisweak":false,"targetisweak":true},{"source":"595722b8-0de4-4f7a-a9e5-448bf6828cd9","target":"7f7f4c43-ba07-44cd-8e3b-f5268c77711e","order":"normal","sourceCard":"0:1","targetCard":"1:1","label":"","hierType":null,"sourceisweak":true,"targetisweak":false},{"source":"3405ae89-726e-4000-9eb2-8fcdf3728e24","target":"a1d5e5fc-c789-495e-96d1-d8ab4adf1b24","order":"parenting","sourceCard":"0:1","targetCard":"0:1","label":"complete","hierType":"complete","sourceisweak":false,"targetisweak":false},{"source":"6bb980dc-776c-4502-9bac-e0dc708bfef3","target":"a1d5e5fc-c789-495e-96d1-d8ab4adf1b24","order":"parenting","sourceCard":"0:1","targetCard":"0:1","label":"complete","hierType":"complete","sourceisweak":false,"targetisweak":false}],"normalization":1,"database":0}
+{
+  "ENTITY_ID": 17,
+  "tables": [
+    {
+      "id": "bb374d1f-96ee-4228-9d4e-38d809a362b0",
+      "position": {
+        "x": 375,
+        "y": 93
+      },
+      "data": {
+        "table_name": "Employee",
+        "fields": [
+          {
+            "fieldName": "name",
+            "fieldType": 10,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "contract details",
+            "fieldType": 11,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 3,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "40f5ed8d-5ffe-40d4-954b-332708f5d875",
+      "position": {
+        "x": -103,
+        "y": 579
+      },
+      "data": {
+        "table_name": "Doctor",
+        "fields": [
+          {
+            "fieldName": "license",
+            "fieldType": 11,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 2,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "ceb2f001-f23e-47ab-822c-df3b259ee7ed",
+      "position": {
+        "x": 371,
+        "y": 389
+      },
+      "data": {
+        "table_name": "Nurse",
+        "fields": [
+          {
+            "fieldName": "category",
+            "fieldType": 11,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 2,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "52ece3e5-bd57-47c6-97e8-437300dacd08",
+      "position": {
+        "x": 806,
+        "y": 580
+      },
+      "data": {
+        "table_name": "Assistant",
+        "fields": [],
+        "next_id": 1,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "0f5eae06-454a-4564-918d-9296cfd63049",
+      "position": {
+        "x": 361,
+        "y": 1000
+      },
+      "data": {
+        "table_name": "Patient",
+        "fields": [
+          {
+            "fieldName": "name",
+            "fieldType": 10,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 2,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "86f98d1c-334b-4730-982b-d023d44b912c",
+      "position": {
+        "x": -102,
+        "y": 782
+      },
+      "data": {
+        "table_name": "Appointment",
+        "fields": [
+          {
+            "fieldName": "id",
+            "fieldType": 3,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              1,
+              1
+            ],
+            "isAutoIncrement": true
+          },
+          {
+            "fieldName": "scheduled date",
+            "fieldType": 7,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "start time",
+            "fieldType": 8,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "end time",
+            "fieldType": 8,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 4,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "cf28c41b-75e7-456a-89c6-ced3a9ccc593",
+      "position": {
+        "x": 365,
+        "y": 780
+      },
+      "data": {
+        "table_name": "Surgery",
+        "fields": [
+          {
+            "fieldName": "id",
+            "fieldType": 3,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              1,
+              1
+            ],
+            "isAutoIncrement": true
+          },
+          {
+            "fieldName": "scheduled date",
+            "fieldType": 7,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "start time",
+            "fieldType": 8,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "end time",
+            "fieldType": 8,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 4,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "24d4082c-4676-4fda-834e-98232c199208",
+      "position": {
+        "x": 817,
+        "y": 794
+      },
+      "data": {
+        "table_name": "Hospitalization",
+        "fields": [
+          {
+            "fieldName": "id",
+            "fieldType": 3,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              1,
+              1
+            ],
+            "isAutoIncrement": true
+          }
+        ],
+        "next_id": 1,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "581d41ac-4f9b-45c7-a5cb-ff21ebbd442b",
+      "position": {
+        "x": 372,
+        "y": 579
+      },
+      "data": {
+        "table_name": "Nurse Role",
+        "fields": [
+          {
+            "fieldName": "role",
+            "fieldType": 11,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 1,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "4912cdee-e4b9-4362-87fa-62617cdaab18",
+      "position": {
+        "x": -93,
+        "y": 975
+      },
+      "data": {
+        "table_name": "Prescription",
+        "fields": [],
+        "next_id": 1,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "87fca945-b4ba-4b2e-9625-dd2a33ab85ed",
+      "position": {
+        "x": -523,
+        "y": 1097
+      },
+      "data": {
+        "table_name": "Medication",
+        "fields": [
+          {
+            "fieldName": "id",
+            "fieldType": 3,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              1,
+              1
+            ],
+            "isAutoIncrement": true
+          },
+          {
+            "fieldName": "name",
+            "fieldType": 11,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 3,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "e7af893f-7d4d-4602-a783-1a07cf4f4737",
+      "position": {
+        "x": -517,
+        "y": 1471
+      },
+      "data": {
+        "table_name": "Side Effect",
+        "fields": [
+          {
+            "fieldName": "effect",
+            "fieldType": 11,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 1,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "e633f90f-e6f8-4486-b4a7-ed00ca0589c3",
+      "position": {
+        "x": -522,
+        "y": 1287
+      },
+      "data": {
+        "table_name": "Med Occ Sev",
+        "fields": [
+          {
+            "fieldName": "probability",
+            "fieldType": 4,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "8"
+            ],
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "severity",
+            "fieldType": 3,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 2,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "d14139ef-03e0-4d35-939a-3f2a3b7e9a87",
+      "position": {
+        "x": -571,
+        "y": 569
+      },
+      "data": {
+        "table_name": "specialization",
+        "fields": [
+          {
+            "fieldName": "field",
+            "fieldType": 11,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 1,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "a4469971-b91b-4b30-8708-3573348dee8d",
+      "position": {
+        "x": 358,
+        "y": 1128
+      },
+      "data": {
+        "table_name": "Bill",
+        "fields": [
+          {
+            "fieldName": "id",
+            "fieldType": 3,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              1,
+              1
+            ],
+            "isAutoIncrement": true
+          },
+          {
+            "fieldName": "cost",
+            "fieldType": 3,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "paid",
+            "fieldType": 0,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              1,
+              1
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 3,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "cb739371-f85d-404b-a53e-b8f50e86f885",
+      "position": {
+        "x": 816,
+        "y": 1130
+      },
+      "data": {
+        "table_name": "Payment",
+        "fields": [
+          {
+            "fieldName": "id",
+            "fieldType": 3,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              1,
+              1
+            ],
+            "isAutoIncrement": true
+          },
+          {
+            "fieldName": "pay date",
+            "fieldType": 7,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "amount",
+            "fieldType": 3,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 3,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "e3237759-1ea4-4ffb-9e09-01221b217997",
+      "position": {
+        "x": -518,
+        "y": 971
+      },
+      "data": {
+        "table_name": "Medication Dosage",
+        "fields": [
+          {
+            "fieldName": "dosage",
+            "fieldType": 3,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              1,
+              1
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 1,
+        "checkName": [],
+        "checkCondition": []
+      }
+    },
+    {
+      "id": "0b0d2397-89b3-48fe-85f4-8aab8a4cebeb",
+      "position": {
+        "x": 1170,
+        "y": 74
+      },
+      "data": {
+        "table_name": "Vital Vue User",
+        "fields": [
+          {
+            "fieldName": "id",
+            "fieldType": 3,
+            "isPK": true,
+            "isNotNull": false,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": "",
+            "isAutoIncrement": true
+          },
+          {
+            "fieldName": "username",
+            "fieldType": 11,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": true,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "password",
+            "fieldType": 11,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "email",
+            "fieldType": 11,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": true,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          },
+          {
+            "fieldName": "type",
+            "fieldType": 10,
+            "isPK": false,
+            "isNotNull": true,
+            "isUnique": false,
+            "defaultValue": "",
+            "args": [
+              "512"
+            ],
+            "isAutoIncrement": false
+          }
+        ],
+        "next_id": 6,
+        "checkName": [],
+        "checkCondition": []
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "40f5ed8d-5ffe-40d4-954b-332708f5d875",
+      "target": "bb374d1f-96ee-4228-9d4e-38d809a362b0",
+      "order": "parenting",
+      "sourceCard": "0:1",
+      "targetCard": "0:1",
+      "label": "complete",
+      "hierType": "complete",
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "ceb2f001-f23e-47ab-822c-df3b259ee7ed",
+      "target": "bb374d1f-96ee-4228-9d4e-38d809a362b0",
+      "order": "parenting",
+      "sourceCard": "0:1",
+      "targetCard": "0:1",
+      "label": "complete",
+      "hierType": "complete",
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "52ece3e5-bd57-47c6-97e8-437300dacd08",
+      "target": "bb374d1f-96ee-4228-9d4e-38d809a362b0",
+      "order": "parenting",
+      "sourceCard": "0:1",
+      "targetCard": "0:1",
+      "label": "complete",
+      "hierType": "complete",
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "40f5ed8d-5ffe-40d4-954b-332708f5d875",
+      "target": "86f98d1c-334b-4730-982b-d023d44b912c",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "conducts",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "40f5ed8d-5ffe-40d4-954b-332708f5d875",
+      "target": "cf28c41b-75e7-456a-89c6-ced3a9ccc593",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "conducts",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "24d4082c-4676-4fda-834e-98232c199208",
+      "target": "ceb2f001-f23e-47ab-822c-df3b259ee7ed",
+      "order": "normal",
+      "sourceCard": "0:n",
+      "targetCard": "1:1",
+      "label": "is responsible",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "24d4082c-4676-4fda-834e-98232c199208",
+      "target": "cf28c41b-75e7-456a-89c6-ced3a9ccc593",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "cf28c41b-75e7-456a-89c6-ced3a9ccc593",
+      "target": "581d41ac-4f9b-45c7-a5cb-ff21ebbd442b",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "1:n",
+      "label": "assists",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "581d41ac-4f9b-45c7-a5cb-ff21ebbd442b",
+      "target": "ceb2f001-f23e-47ab-822c-df3b259ee7ed",
+      "order": "normal",
+      "sourceCard": "0:n",
+      "targetCard": "1:1",
+      "label": "performs",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "86f98d1c-334b-4730-982b-d023d44b912c",
+      "target": "4912cdee-e4b9-4362-87fa-62617cdaab18",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "prescribes",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "24d4082c-4676-4fda-834e-98232c199208",
+      "target": "4912cdee-e4b9-4362-87fa-62617cdaab18",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "prescribes",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "87fca945-b4ba-4b2e-9625-dd2a33ab85ed",
+      "target": "e633f90f-e6f8-4486-b4a7-ed00ca0589c3",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "with",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": true
+    },
+    {
+      "source": "e633f90f-e6f8-4486-b4a7-ed00ca0589c3",
+      "target": "e7af893f-7d4d-4602-a783-1a07cf4f4737",
+      "order": "normal",
+      "sourceCard": "0:1",
+      "targetCard": "1:1",
+      "label": "with",
+      "hierType": null,
+      "sourceisweak": true,
+      "targetisweak": false
+    },
+    {
+      "source": "40f5ed8d-5ffe-40d4-954b-332708f5d875",
+      "target": "d14139ef-03e0-4d35-939a-3f2a3b7e9a87",
+      "order": "normal",
+      "sourceCard": "0:1",
+      "targetCard": "1:n",
+      "label": "specializes",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "d14139ef-03e0-4d35-939a-3f2a3b7e9a87",
+      "target": "d14139ef-03e0-4d35-939a-3f2a3b7e9a87",
+      "order": "normal",
+      "sourceCard": "0:n",
+      "targetCard": "0:1",
+      "label": "",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "86f98d1c-334b-4730-982b-d023d44b912c",
+      "target": "a4469971-b91b-4b30-8708-3573348dee8d",
+      "order": "normal",
+      "sourceCard": "0:1",
+      "targetCard": "1:1",
+      "label": "generates",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "24d4082c-4676-4fda-834e-98232c199208",
+      "target": "a4469971-b91b-4b30-8708-3573348dee8d",
+      "order": "normal",
+      "sourceCard": "0:1",
+      "targetCard": "0:1",
+      "label": "generates",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "a4469971-b91b-4b30-8708-3573348dee8d",
+      "target": "cb739371-f85d-404b-a53e-b8f50e86f885",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "1:n",
+      "label": "receives",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "52ece3e5-bd57-47c6-97e8-437300dacd08",
+      "target": "24d4082c-4676-4fda-834e-98232c199208",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "schedules",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "52ece3e5-bd57-47c6-97e8-437300dacd08",
+      "target": "86f98d1c-334b-4730-982b-d023d44b912c",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "schedules",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "0f5eae06-454a-4564-918d-9296cfd63049",
+      "target": "cb739371-f85d-404b-a53e-b8f50e86f885",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "realizes",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "0f5eae06-454a-4564-918d-9296cfd63049",
+      "target": "86f98d1c-334b-4730-982b-d023d44b912c",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "0f5eae06-454a-4564-918d-9296cfd63049",
+      "target": "cf28c41b-75e7-456a-89c6-ced3a9ccc593",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "0f5eae06-454a-4564-918d-9296cfd63049",
+      "target": "24d4082c-4676-4fda-834e-98232c199208",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "0:n",
+      "label": "",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "86f98d1c-334b-4730-982b-d023d44b912c",
+      "target": "581d41ac-4f9b-45c7-a5cb-ff21ebbd442b",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "1:n",
+      "label": "assists",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "4912cdee-e4b9-4362-87fa-62617cdaab18",
+      "target": "e3237759-1ea4-4ffb-9e09-01221b217997",
+      "order": "normal",
+      "sourceCard": "1:1",
+      "targetCard": "1:n",
+      "label": "",
+      "hierType": null,
+      "sourceisweak": false,
+      "targetisweak": true
+    },
+    {
+      "source": "e3237759-1ea4-4ffb-9e09-01221b217997",
+      "target": "87fca945-b4ba-4b2e-9625-dd2a33ab85ed",
+      "order": "normal",
+      "sourceCard": "0:1",
+      "targetCard": "1:1",
+      "label": "",
+      "hierType": null,
+      "sourceisweak": true,
+      "targetisweak": false
+    },
+    {
+      "source": "0f5eae06-454a-4564-918d-9296cfd63049",
+      "target": "0b0d2397-89b3-48fe-85f4-8aab8a4cebeb",
+      "order": "parenting",
+      "sourceCard": "0:1",
+      "targetCard": "0:1",
+      "label": "complete",
+      "hierType": "complete",
+      "sourceisweak": false,
+      "targetisweak": false
+    },
+    {
+      "source": "bb374d1f-96ee-4228-9d4e-38d809a362b0",
+      "target": "0b0d2397-89b3-48fe-85f4-8aab8a4cebeb",
+      "order": "parenting",
+      "sourceCard": "0:1",
+      "targetCard": "0:1",
+      "label": "complete",
+      "hierType": "complete",
+      "sourceisweak": false,
+      "targetisweak": false
+    }
+  ],
+  "normalization": 1,
+  "database": 0
+}
