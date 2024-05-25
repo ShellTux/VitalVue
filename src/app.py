@@ -425,13 +425,16 @@ def add_prescription():
     statement = """
                 INSERT INTO
                     prescription (
-                    
+                        <id>,
+                        validity_date
                     )
                 VALUES (
-                    
+                    %s, %s
                 )
+                RETURNING 
+                    prescription_id
                 """
-    key_values = ['type', 'event_id', 'validity', 'medicines']
+    key_values = ['type', 'event_id', 'validity']
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
@@ -439,9 +442,17 @@ def add_prescription():
         return jsonify(response)
     
     # 6. get input values
+    type = payload['type']
+    key_values.remove('type')
     input_values = [payload[key] for key in key_values]
 
-    # connect to database
+    # 7. update statement based on type
+    if type == 'appointment':
+        statement.replace('<id>', 'appointment_id')
+    else:
+        statement.replace('<id>', 'hospitalization_id')
+
+    # 8. connect to database
     conn = connect_db()
     cursor = conn.cursor()
 
