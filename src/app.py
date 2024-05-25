@@ -411,17 +411,6 @@ def schedule_surgery(hospitalization_id):
         return jsonify(response)
     
     # 3. get request payload
-    # 1. get token data
-    id = get_jwt_identity()
-    type = get_jwt().get('type')
-
-    # 2. validate caller
-    if type != IndividualTypes.ASSISTANT:
-        response = {'status': StatusCode.API_ERROR.value, 
-                    'errors': 'Only assistants can use this endpoint'}
-        return jsonify(response)
-    
-    # 3. get request payload
     payload = request.get_json()
 
     # 4. query statement and key values
