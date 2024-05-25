@@ -119,3 +119,12 @@ END;
 $$;
 
 --- }}}
+
+CREATE OR REPLACE FUNCTION create_bill_after_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO bill (cost, paid)
+    VALUES (NEW.cost, FALSE);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
