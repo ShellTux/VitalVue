@@ -319,14 +319,11 @@ def schedule_appointment():
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': appointment_id}
         conn.commit()
-                    'results': appointment_id}
-        conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'POST {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
-        conn.rollback()
         conn.rollback()
 
     finally:
