@@ -41,7 +41,7 @@ CREATE TABLE appointment (
 );
 
 CREATE TABLE surgery (
-	id				 BIGINT,
+	id				 BIGSERIAL,
 	scheduled_date			 DATE NOT NULL,
 	start_time			 TIMESTAMP NOT NULL,
 	end_time				 TIMESTAMP NOT NULL,
