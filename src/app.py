@@ -648,33 +648,69 @@ def list_top3_patients():
 
     return jsonify(response)
 
-################################################################################
-## DAILY SUMMARY
-## -- only assistants
-## 
-################################################################################
-
 @app.route('/daily/<year_month_day>/', methods = ['GET'])
 @jwt_required()
-def daily_summary(year_month_day):
-    logger.info(f'GET {request.path}')
+def daily_summary(year_month_day: str):
+    r'''
+    Daily Summary.
+
+    List a count for all hospitalizations details of a given day. Consider,
+    surgeries, payments, and prescriptions. Just one SQL query should be used to
+    obtain the information. Only assistants can use this endpoint.
+    '''
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
     identity = get_jwt_identity()
-    payload = request.get_json()
+    individual_type = token.get('type')
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    if individual_type != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': "You don't have permission to see daily summary"}
+        return jsonify(response)
 
-    statement = ""
-    values = ""
+    statement = '''
+        SELECT
+            surgery.start_time AS "Day",
+            COUNT(hospitalization.id) AS "Hospitalizations",
+            COUNT(surgery.id) AS "Surgeries",
+            COUNT(payment.id) AS "Payments",
+            COUNT(CASE WHEN bill.paid = FALSE THEN 1 ELSE NULL END) AS "Unpaid Bills"
+        FROM
+            hospitalization hospitalization
+        LEFT JOIN
+            surgery surgery ON hospitalization.id = surgery.hospitalization_id
+        LEFT JOIN
+            payment payment ON hospitalization.id = surgery.hospitalization_id
+        LEFT JOIN
+            bill ON payment.bill_id = bill.id
+        GROUP BY
+            surgery.start_time;
+    '''
+
+    connection = connect_db()
+    cursor = connection.cursor()
 
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement)
+        rows = cursor.fetchall()
 
-        results = []
-        response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+        if len(rows) == 0:
+            results = list(map(lambda row: {
+                    'day': row[0],
+                    'hospitalizations': row[1],
+                    'surgeries': row[2],
+                    'payments': row[3],
+                    'unpaid_bills': row[4]
+                }, rows))
+        else:
+            results = 'No available hospitalizations'
+
+        response = {
+                'status': StatusCode.SUCCESS.value,
+                'results': results
+                }
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'GET {request.path} - error: {error}')
@@ -682,8 +718,8 @@ def daily_summary(year_month_day):
                     'errors': str(error)}
 
     finally:
-        if conn is not None:
-            conn.close()
+        if connection is not None:
+            connection.close()
 
     return jsonify(response)
 
