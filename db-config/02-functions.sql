@@ -120,11 +120,30 @@ $$;
 
 --- }}}
 
+-- Create bill after scheduling appointment
 CREATE OR REPLACE FUNCTION create_bill_after_insert()
 RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO bill (cost, paid)
     VALUES (NEW.cost, FALSE);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create hospitalization when new surgery is not associated with existing hospitalization
+CREATE OR REPLACE FUNCTION create_hospitalization_if_needed()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_hospitalization_id integer;
+BEGIN
+    IF NEW.hospitalization_id IS NULL THEN
+        INSERT INTO hospitalization (patient_id)
+        VALUES (NEW.patient_vital_vue_user_id)
+        RETURNING hospitalization_id INTO v_hospitalization_id;
+        
+        NEW.hospitalization_id = v_hospitalization_id;
+    END IF;
+    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
