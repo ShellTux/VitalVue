@@ -393,24 +393,44 @@ def schedule_surgery(hospitalization_id):
 def get_prescriptions(person_id):
     logger.info(f'GET {request.path}')
 
-    token = get_jwt()
-    identity = get_jwt_identity()
-    payload = request.get_json()
+    # 1. get token data
+    id = get_jwt_identity()
+    type = get_jwt().get('type')
 
+    # 2. check if patient is target patient
+    if type == IndividualTypes.PATIENT and id != person_id:
+        return jsonify({'status': StatusCode.API_ERROR.value, 
+                        'errors': 'Only the target patient can use this endpoint'})
+
+    # 3. query statement and values
+    statement = """
+                SELECT 
+                    p.prescription_id, 
+                    p.validity_date
+                FROM 
+                    prescription AS p
+                WHERE 
+                    p.patient_vital_vue_user_id = %s
+                """
+    values = (person_id,)
+    
+    # 4. connect to database
     conn = connect_db()
     cursor = conn.cursor()
-
-    statement = ""
-    values = ""
 
     try:
         cursor.execute(statement, values)
         rows = cursor.fetchall()
 
-        results = []
-        for row in rows:
-            results.append({})
-
+        if rows:
+            results = []
+            for row in rows:
+                content = {'prescription_id': row[0], 
+                           'validity_date': row[1]}
+                results.append(content)
+        else:
+            results = 'This patient has no prescriptions'
+        
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
 
@@ -422,8 +442,6 @@ def get_prescriptions(person_id):
     finally:
         if conn is not None:
             conn.close()
-
-    response = {'status': StatusCode.SUCCESS.value}
 
     return jsonify(response)
 
