@@ -411,12 +411,23 @@ def schedule_surgery(hospitalization_id):
         return jsonify(response)
     
     # 3. get request payload
+    # 1. get token data
+    id = get_jwt_identity()
+    type = get_jwt().get('type')
+
+    # 2. validate caller
+    if type != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'Only assistants can use this endpoint'}
+        return jsonify(response)
+    
+    # 3. get request payload
     payload = request.get_json()
 
     # 4. query statement and key values
     statement = """
-                INSERT INTO 
-                    surgery (
+                WITH new_surgery AS (
+                    INSERT INTO surgery (
                         patient_vital_vue_user_id,
                         doctor_employee_vital_vue_user_id,
                         scheduled_date,
@@ -424,18 +435,41 @@ def schedule_surgery(hospitalization_id):
                         end_time,
                         hospitalization_id
                     )
-                VALUES (
-                    %s, %s, %s, %s, %s, %s
+                    VALUES (
+                        %s, %s, %s, %s, %s, %s
+                    )
+                    RETURNING
+                        id
                 )
-                RETURNING 
+                INSERT INTO nurse_role (
+                    surgery_id,
+                    nurse_employee_vital_vue_user_id,
+                    role
+                )
+                SELECT
+                    ns.id,
+                    nurse_employee_vital_vue_user_id,
+                    role
+                FROM 
+                    new_surgery ns,
+                    (VALUES (%s, %s)) AS nurse_role(nurse_employee_vital_vue_user_id, role);
+                SELECT 
                     hospitalization_id,
                     id,
                     patient_vital_vue_user_id,
                     doctor_employee_vital_vue_user_id,
-                    scheduled_date;
+                    scheduled_date
+                FROM
+                    new_surgery;
                 """
-    key_values = ['patient_user_id', 'doctor_user_id', 
+    key_values = ['patient_user_id', 'doctor_user_id', 'nurses', 
                   'date', 'start_time', 'end_time']
+    if hospitalization_id is None:
+        # remove 'hospitalization_id' column from statement
+        column_substr = 'hospitalization_id'
+        index = statement.find(column_substr)
+        statement = statement[:index] + statement[index + len(column_substr):]
+        statement.replace('end_time,', 'end_time')
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
@@ -445,9 +479,16 @@ def schedule_surgery(hospitalization_id):
     # 6. get input values
     payload['start_time'] = payload['date'] + ' ' + payload['start_time']
     payload['end_time'] = payload['date'] + ' ' + payload['end_time']
+    nurses = payload['nurses']
+    key_values.remove('nurses')
     input_values = [payload[key] for key in key_values]
     if hospitalization_id is not None:
         input_values.append(hospitalization_id)
+    input_nurses = [item for nurse in nurses for item in nurse]
+    input_values.extend(input_nurses)
+
+    logging.debug(statement)
+    logging.debug(input_values)
 
     # 7. connect to database
     conn = connect_db()
