@@ -340,37 +340,32 @@ def schedule_surgery(hospitalization_id):
     # 4. query statement and key values
     statement = """
                 WITH new_surgery AS (
-                    INSERT INTO 
-                        surgery (
-                            patient_vital_vue_user_id,
-                            doctor_employee_vital_vue_user_id,
-                            scheduled_date,
-                            start_time,
-                            end_time,
-                            hospitalization_id
-                        )
+                    INSERT INTO surgery (
+                        patient_vital_vue_user_id,
+                        doctor_employee_vital_vue_user_id,
+                        scheduled_date,
+                        start_time,
+                        end_time,
+                        hospitalization_id
+                    )
                     VALUES (
                         %s, %s, %s, %s, %s, %s
                     )
                     RETURNING
                         id
                 )
-                INSERT INTO 
-                    nurse_role (
-                        surgery_id,
-                        nurse_employee_vital_vue_user_id,
-                        role
-                    )
+                INSERT INTO nurse_role (
+                    surgery_id,
+                    nurse_employee_vital_vue_user_id,
+                    role
+                )
                 SELECT
-                    id,
+                    ns.id,
                     nurse_employee_vital_vue_user_id,
                     role
                 FROM 
-                    new_surgery (
-                        VALUES (
-                            %s, %s
-                        )
-                    );
+                    new_surgery ns,
+                    (VALUES (%s, %s)) AS nurse_role(nurse_employee_vital_vue_user_id, role);
                 SELECT 
                     hospitalization_id,
                     id,
@@ -403,7 +398,10 @@ def schedule_surgery(hospitalization_id):
     if hospitalization_id is not None:
         input_values.append(hospitalization_id)
     input_nurses = [item for nurse in nurses for item in nurse]
-    input_values.append(input_nurses)
+    input_values.extend(input_nurses)
+
+    logging.debug(statement)
+    logging.debug(input_values)
 
     # 7. connect to database
     conn = connect_db()

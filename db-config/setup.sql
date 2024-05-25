@@ -61,7 +61,7 @@ CREATE TABLE hospitalization (
 
 CREATE TABLE nurse_role (
 	role				 TEXT NOT NULL,
-	appointment_id			 BIGINT NOT NULL,
+	appointment_id			 BIGINT,
 	nurse_employee_vital_vue_user_id BIGINT NOT NULL,
 	surgery_id			 BIGINT NOT NULL
 );
