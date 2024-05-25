@@ -360,6 +360,12 @@ def schedule_surgery(hospitalization_id):
                 """
     key_values = ['patient_user_id', 'doctor_user_id', 
                   'date', 'start_time', 'end_time']
+    if hospitalization_id is None:
+        # remove 'hospitalization_id' column from statement
+        column_substr = 'hospitalization_id'
+        index = statement.find(column_substr)
+        statement = statement[:index] + statement[index + len(column_substr):]
+        statement.replace('end_time,', 'end_time')
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
