@@ -277,16 +277,18 @@ def schedule_appointment():
                         scheduled_date,
                         start_time,
                         end_time,
+                        cost,
                         patient_vital_vue_user_id
                     )
                 VALUES (
-                    %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s
                 )
                 RETURNING 
                     id;
                 """
     key_values = ['doctor_id', 'date', 
-                  'start_time', 'end_time']
+                  'start_time', 'end_time', 
+                  'cost']
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
