@@ -442,11 +442,11 @@ def add_prescription():
         return jsonify(response)
     
     # 6. get input values
-    type = payload['type']
     key_values.remove('type')
     input_values = [payload[key] for key in key_values]
 
     # 7. update statement based on type
+    type = payload['type']
     if type == 'appointment':
         statement.replace('<id>', 'appointment_id')
     else:
