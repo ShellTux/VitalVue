@@ -397,9 +397,13 @@ def schedule_surgery(hospitalization_id):
     # 6. get input values
     payload['start_time'] = payload['date'] + ' ' + payload['start_time']
     payload['end_time'] = payload['date'] + ' ' + payload['end_time']
+    nurses = payload['nurses']
+    key_values.remove('nurses')
     input_values = [payload[key] for key in key_values]
     if hospitalization_id is not None:
         input_values.append(hospitalization_id)
+    input_nurses = [item for nurse in nurses for item in nurse]
+    input_values.append(input_nurses)
 
     # 7. connect to database
     conn = connect_db()
