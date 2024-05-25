@@ -425,7 +425,7 @@ def add_prescription():
     statement = """
                 INSERT INTO
                     prescription (
-                        <id>,
+                        <event_id>,
                         validity_date
                     )
                 VALUES (
@@ -448,9 +448,9 @@ def add_prescription():
     # 7. update statement based on type
     type = payload['type']
     if type == 'appointment':
-        statement.replace('<id>', 'appointment_id')
+        statement.replace('<event_id>', 'appointment_id')
     else:
-        statement.replace('<id>', 'hospitalization_id')
+        statement.replace('<event_id>', 'hospitalization_id')
 
     # 8. connect to database
     conn = connect_db()
