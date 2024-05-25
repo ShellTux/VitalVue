@@ -264,6 +264,17 @@ def schedule_appointment():
         return jsonify(response)
     
     # 3. get request payload
+    # 1. get token data
+    id = get_jwt_identity()
+    type = get_jwt().get('type')
+
+    # 2. validate caller
+    if type != IndividualTypes.PATIENT:
+        response = {'status': StatusCode.API_ERROR, 
+                    'errors': 'Only patients can use this endpoint'}
+        return jsonify(response)
+    
+    # 3. get request payload
     payload = request.get_json()
 
     # 4. query statement and key values
@@ -279,7 +290,8 @@ def schedule_appointment():
                 VALUES (
                     %s, %s, %s, %s, %s
                 )
-                RETURNING id;
+                RETURNING 
+                    id;
                 """
     key_values = ['doctor_id', 'date', 
                   'start_time', 'end_time']
@@ -302,7 +314,11 @@ def schedule_appointment():
     try:
         cursor.execute(statement, input_values)
         appointment_id = cursor.fetchone()[0]
+        cursor.execute(statement, input_values)
+        appointment_id = cursor.fetchone()[0]
         response = {'status': StatusCode.SUCCESS.value, 
+                    'results': appointment_id}
+        conn.commit()
                     'results': appointment_id}
         conn.commit()
 
@@ -310,6 +326,7 @@ def schedule_appointment():
         logger.error(f'POST {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
+        conn.rollback()
         conn.rollback()
 
     finally:
