@@ -421,11 +421,40 @@ def add_prescription():
     # 3. get request payload
     payload = request.get_json()
 
+    # 4. key values
+    key_values = ['type', 
+                  'event_id', 
+                  'validity',
+                  'medicines']
+    
+    # 5. validate payload
+    response = validate_payload(payload, key_values)
+    if response:
+        return jsonify(response)
+
+    # 6. get input values
+    medicines = payload['medicines']
+    key_values.remove('medicines')
+
+    event_type = payload['type']
+    key_values.remove('type')
+
+    input_values = [payload[key] for key in key_values]
+
+    input_medicines = [item for med in medicines for item in med]
+    input_values.extend(input_medicines)
+
+    # 7. update statement params and input based on event type
+    if event_type == 'appointment':
+        event_id_column = 'appointment_id'
+    else:
+        event_id_column = 'hospitalization_id'
+
     # 4. query statement and key values
     statement = """
                 INSERT INTO
                     prescription (
-                        <event_id>,
+                        {event_id_column},
                         validity_date
                     )
                 VALUES (
@@ -434,27 +463,16 @@ def add_prescription():
                 RETURNING 
                     prescription_id
                 """
-    key_values = ['type', 'event_id', 'validity']
-
-    # 5. validate payload
-    response = validate_payload(payload, key_values)
-    if response:
-        return jsonify(response)
-    
-    # 6. get input values
-    key_values.remove('type')
-    input_values = [payload[key] for key in key_values]
-
-    # 7. update statement based on type
-    type = payload['type']
-    if type == 'appointment':
-        statement.replace('<event_id>', 'appointment_id')
-    else:
-        statement.replace('<event_id>', 'hospitalization_id')
+    # format statement with params
+    statement.format(event_id_column=event_id_column, 
+                     )
 
     # 8. connect to database
     conn = connect_db()
     cursor = conn.cursor()
+
+    logging.debug(statement)
+    logging.debug(input_values)
 
     try:
         cursor.execute(statement, input_values)
