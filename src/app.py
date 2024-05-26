@@ -427,7 +427,7 @@ def schedule_surgery(hospitalization_id):
                         hospitalization_id
                     )
                     VALUES (
-                        %s, %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s<, %s>
                     )
                     RETURNING
                         id
@@ -475,6 +475,9 @@ def schedule_surgery(hospitalization_id):
     input_values = [payload[key] for key in key_values]
     if hospitalization_id is not None:
         input_values.append(hospitalization_id)
+        statement.replace('<, %s>', ', %s')
+    else:
+        statement.replace('<, %s>', '')
     input_nurses = [item for nurse in nurses for item in nurse]
     input_values.extend(input_nurses)
 
