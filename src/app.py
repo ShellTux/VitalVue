@@ -302,6 +302,8 @@ def schedule_appointment():
     conn = connect_db()
     cursor = conn.cursor()
 
+    logging.debug(input_values)
+
     try:
         cursor.execute(statement, input_values)
         appointment_id = cursor.fetchone()[0]
@@ -342,7 +344,7 @@ def see_appointments(patient_user_id):
         response = {'status': StatusCode.API_ERROR.value, 
                     'errors': "You don't have permission to see patient appointments"}
         return jsonify(response)
-    if type == IndividualTypes.PATIENT and id != patient_user_id:
+    if type == IndividualTypes.PATIENT and str(id) != patient_user_id:
         response = {'status': StatusCode.API_ERROR.value, 
                     'errors': 'You are not the target patient'}
         return jsonify(response)

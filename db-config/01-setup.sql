@@ -35,7 +35,7 @@ CREATE TABLE appointment (
 	end_time				 TIMESTAMP NOT NULL,
 	cost				 BIGINT NOT NULL,
 	patient_vital_vue_user_id	 BIGINT NOT NULL,
-	bill_id				 BIGINT NOT NULL,
+	bill_id				 BIGINT,
 	doctor_employee_vital_vue_user_id BIGINT NOT NULL,
 	PRIMARY KEY(id)
 );

@@ -128,11 +128,11 @@ DECLARE
 BEGIN
     INSERT INTO bill (cost, paid)
     VALUES (NEW.cost, FALSE)
-	RETURNING bill_id INTO gen_bill_id;
+	RETURNING id INTO gen_bill_id;
 
 	UPDATE appointment
 	SET bill_id = gen_bill_id
-	WHERE appointment_id = NEW.appointment_id;
+	WHERE id = NEW.id;
 
 	NEW.bill_id = gen_bill_id;
 
