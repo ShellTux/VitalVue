@@ -328,15 +328,15 @@ def see_appointments(patient_user_id):
 
     # 1. get token data
     id = get_jwt_identity()
-    user_type = get_jwt().get('type')
+    type = get_jwt().get('type')
 
     # 2. check if endpoint is accessible to caller
     allowed = [IndividualTypes.ASSISTANT, IndividualTypes.PATIENT]
-    if user_type not in allowed:
+    if type not in allowed:
         response = {'status': StatusCode.API_ERROR.value, 
                     'errors': "You don't have permission to see patient appointments"}
         return jsonify(response)
-    if user_type == IndividualTypes.PATIENT and str(id) != patient_user_id:
+    if type == IndividualTypes.PATIENT and str(id) != patient_user_id:
         response = {'status': StatusCode.API_ERROR.value, 
                     'errors': 'You are not the target patient'}
         return jsonify(response)
