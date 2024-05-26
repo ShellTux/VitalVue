@@ -430,20 +430,27 @@ def schedule_surgery(hospitalization_id):
                         %s, %s, %s, %s, %s<, %s>
                     )
                     RETURNING
-                        id
+                        hospitalization_id,
+                        id,
+                        patient_vital_vue_user_id,
+                        doctor_employee_vital_vue_user_id,
+                        scheduled_date
+                ), new_nurses AS (
+                    INSERT INTO nurse_role (
+                        surgery_id,
+                        nurse_employee_vital_vue_user_id,
+                        role
+                    )
+                    SELECT
+                        ns.id,
+                        nurse_employee_vital_vue_user_id,
+                        role
+                    FROM 
+                        new_surgery ns,
+                        (VALUES <nurse_values>) AS nurse_role(nurse_employee_vital_vue_user_id, role)
+                    RETURNING
+                        1
                 )
-                INSERT INTO nurse_role (
-                    surgery_id,
-                    nurse_employee_vital_vue_user_id,
-                    role
-                )
-                SELECT
-                    ns.id,
-                    nurse_employee_vital_vue_user_id,
-                    role
-                FROM 
-                    new_surgery ns,
-                    (VALUES (%s, %s)) AS nurse_role(nurse_employee_vital_vue_user_id, role);
                 SELECT 
                     hospitalization_id,
                     id,
@@ -460,7 +467,7 @@ def schedule_surgery(hospitalization_id):
         column_substr = 'hospitalization_id'
         index = statement.find(column_substr)
         statement = statement[:index] + statement[index + len(column_substr):]
-        statement.replace('end_time,', 'end_time')
+        statement = statement.replace('end_time,', 'end_time')
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
@@ -470,14 +477,20 @@ def schedule_surgery(hospitalization_id):
     # 6. get input values
     payload['start_time'] = payload['date'] + ' ' + payload['start_time']
     payload['end_time'] = payload['date'] + ' ' + payload['end_time']
+
     nurses = payload['nurses']
     key_values.remove('nurses')
+
     input_values = [payload[key] for key in key_values]
     if hospitalization_id is not None:
         input_values.append(hospitalization_id)
-        statement.replace('<, %s>', ', %s')
+        statement = statement.replace("<, %s>", ", %s")
     else:
-        statement.replace('<, %s>', '')
+        statement = statement.replace("<, %s>", "")
+
+    nurses_statement = ', '.join(['(%s, %s)' for _ in nurses])
+    statement = statement.replace('<nurse_values>', nurses_statement)
+    
     input_nurses = [item for nurse in nurses for item in nurse]
     input_values.extend(input_nurses)
 
@@ -490,12 +503,17 @@ def schedule_surgery(hospitalization_id):
 
     try:
         cursor.execute(statement, input_values)
-        row = cursor.fetchone()[0]
-        results = {'hospitalization_id': row[0],
-                   'surgery_id': row[1],
-                   'patient_id': row[2],
-                   'doctor_id': row[3],
-                   'date': row[4]}
+        row = cursor.fetchone()
+
+        if row:
+            results = {'hospitalization_id': row[0],
+                       'surgery_id': row[1],
+                       'patient_id': row[2],
+                       'doctor_id': row[3],
+                       'date': row[4]}
+        else:
+            results = 'no values returned'
+
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
         conn.commit()

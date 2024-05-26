@@ -46,7 +46,7 @@ CREATE TABLE surgery (
 	start_time			 TIMESTAMP NOT NULL,
 	end_time				 TIMESTAMP NOT NULL,
 	patient_vital_vue_user_id	 BIGINT NOT NULL,
-	hospitalization_id		 BIGINT NOT NULL,
+	hospitalization_id		 BIGINT,
 	doctor_employee_vital_vue_user_id BIGINT NOT NULL,
 	PRIMARY KEY(id)
 );
@@ -54,7 +54,7 @@ CREATE TABLE surgery (
 CREATE TABLE hospitalization (
 	id				 BIGSERIAL,
 	patient_vital_vue_user_id	 BIGINT NOT NULL,
-	nurse_employee_vital_vue_user_id BIGINT NOT NULL,
+	nurse_employee_vital_vue_user_id BIGINT,
 	PRIMARY KEY(id)
 );
 
