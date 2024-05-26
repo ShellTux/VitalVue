@@ -689,33 +689,72 @@ def list_top3_patients():
 
     return jsonify(response)
 
-################################################################################
-## DAILY SUMMARY
-## -- only assistants
-## 
-################################################################################
-
 @app.route('/daily/<year_month_day>/', methods = ['GET'])
 @jwt_required()
-def daily_summary(year_month_day):
-    logger.info(f'GET {request.path}')
+def daily_summary(year_month_day: str):
+    r'''
+    Daily Summary.
+
+    List a count for all hospitalizations details of a given day. Consider,
+    surgeries, payments, and prescriptions. Just one SQL query should be used to
+    obtain the information. Only assistants can use this endpoint.
+    '''
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
     identity = get_jwt_identity()
-    payload = request.get_json()
+    individual_type = token.get('type')
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    if individual_type != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': "You don't have permission to see daily summary"}
+        return jsonify(response)
 
-    statement = ""
-    values = ""
+    # TODO: This sql statement gives all results grouped by date, not by the
+    # given day.
+    statement = '''
+        SELECT
+            SUM(payment.amount) AS "Amount Spent",
+            COUNT(surgery.id) AS "Surgeries",
+            COUNT(prescription.id) AS Prescriptions
+        FROM
+            hospitalization
+        LEFT JOIN
+            hospitalization_bill ON hospitalization.id = hospitalization_bill.hospitalization_id
+        LEFT JOIN
+            bill ON hospitalization_bill.bill_id = bill.id
+        LEFT JOIN
+            payment ON bill.id = payment.bill_id
+        LEFT JOIN
+            surgery ON hospitalization.id = surgery.hospitalization_id
+        LEFT JOIN
+            prescription ON hospitalization.id = prescription.hospitalization_id
+        WHERE
+            hospitalization.assistant_employee_vital_vue_user_id IN (SELECT employee_vital_vue_user_id FROM assistant)
+        GROUP BY
+            date(scheduled_date);
+    '''
+    connection = connect_db()
+    cursor = connection.cursor()
 
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement)
+        rows = cursor.fetchall()
 
-        results = []
-        response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+        if len(rows) == 0:
+            results = list(map(lambda row: {
+                'amount_spent': row[0],
+                'surgeries': row[1],
+                'prescriptions': row[2]
+                }, rows))
+        else:
+            results = 'No available hospitalizations'
+
+        response = {
+                'status': StatusCode.SUCCESS.value,
+                'results': results
+                }
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'GET {request.path} - error: {error}')
@@ -723,8 +762,8 @@ def daily_summary(year_month_day):
                     'errors': str(error)}
 
     finally:
-        if conn is not None:
-            conn.close()
+        if connection is not None:
+            connection.close()
 
     return jsonify(response)
 
