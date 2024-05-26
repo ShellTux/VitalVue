@@ -124,7 +124,15 @@ CREATE OR REPLACE FUNCTION create_bill_after_insert()
 RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO bill (cost, paid)
-    VALUES (NEW.cost, FALSE);
+    VALUES (NEW.cost, FALSE)
+	RETURNING id INTO gen_bill_id;
+
+	UPDATE appointment
+	SET bill_id = gen_bill_id
+	WHERE id = NEW.id;
+
+	NEW.bill_id = gen_bill_id;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

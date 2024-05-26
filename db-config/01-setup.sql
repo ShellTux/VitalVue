@@ -33,10 +33,10 @@ CREATE TABLE appointment (
 	scheduled_date			 DATE NOT NULL,
 	start_time				 TIMESTAMP NOT NULL,
 	end_time				 TIMESTAMP NOT NULL,
-	patient_vital_vue_user_id		 BIGINT NOT NULL,
-	assistant_employee_vital_vue_user_id BIGINT,
-	bill_id				 BIGINT NOT NULL,
-	doctor_employee_vital_vue_user_id	 BIGINT NOT NULL,
+	cost				 BIGINT NOT NULL,
+	patient_vital_vue_user_id	 BIGINT NOT NULL,
+	bill_id				 BIGINT,
+	doctor_employee_vital_vue_user_id BIGINT NOT NULL,
 	PRIMARY KEY(id)
 );
 
