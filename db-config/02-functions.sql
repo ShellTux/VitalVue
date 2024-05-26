@@ -123,9 +123,19 @@ $$;
 -- Create bill after scheduling appointment
 CREATE OR REPLACE FUNCTION create_bill_after_insert()
 RETURNS TRIGGER AS $$
+DECLARE
+	gen_bill_id BIGINT;
 BEGIN
     INSERT INTO bill (cost, paid)
-    VALUES (NEW.cost, FALSE);
+    VALUES (NEW.cost, FALSE)
+	RETURNING bill_id INTO gen_bill_id;
+
+	UPDATE appointment
+	SET bill_id = gen_bill_id
+	WHERE appointment_id = NEW.appointment_id;
+
+	NEW.bill_id = gen_bill_id;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

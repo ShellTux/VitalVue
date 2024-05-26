@@ -274,16 +274,18 @@ def schedule_appointment():
                         scheduled_date,
                         start_time,
                         end_time,
+                        cost,
                         patient_vital_vue_user_id
                     )
                 VALUES (
-                    %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s
                 )
                 RETURNING 
                     id;
                 """
     key_values = ['doctor_id', 'date', 
-                  'start_time', 'end_time']
+                  'start_time', 'end_time', 
+                  'cost']
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
@@ -400,17 +402,6 @@ def see_appointments(patient_user_id):
 def schedule_surgery(hospitalization_id):
     logger.info(f'{request.method} {request.path}')
 
-    # 1. get token data
-    id = get_jwt_identity()
-    type = get_jwt().get('type')
-
-    # 2. validate caller
-    if type != IndividualTypes.ASSISTANT:
-        response = {'status': StatusCode.API_ERROR.value, 
-                    'errors': 'Only assistants can use this endpoint'}
-        return jsonify(response)
-    
-    # 3. get request payload
     # 1. get token data
     id = get_jwt_identity()
     type = get_jwt().get('type')
@@ -719,33 +710,72 @@ def list_top3_patients():
 
     return jsonify(response)
 
-################################################################################
-## DAILY SUMMARY
-## -- only assistants
-## 
-################################################################################
-
 @app.route('/daily/<year_month_day>/', methods = ['GET'])
 @jwt_required()
-def daily_summary(year_month_day):
-    logger.info(f'GET {request.path}')
+def daily_summary(year_month_day: str):
+    r'''
+    Daily Summary.
+
+    List a count for all hospitalizations details of a given day. Consider,
+    surgeries, payments, and prescriptions. Just one SQL query should be used to
+    obtain the information. Only assistants can use this endpoint.
+    '''
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
     identity = get_jwt_identity()
-    payload = request.get_json()
+    individual_type = token.get('type')
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    if individual_type != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': "You don't have permission to see daily summary"}
+        return jsonify(response)
 
-    statement = ""
-    values = ""
+    # TODO: This sql statement gives all results grouped by date, not by the
+    # given day.
+    statement = '''
+        SELECT
+            SUM(payment.amount) AS "Amount Spent",
+            COUNT(surgery.id) AS "Surgeries",
+            COUNT(prescription.id) AS Prescriptions
+        FROM
+            hospitalization
+        LEFT JOIN
+            hospitalization_bill ON hospitalization.id = hospitalization_bill.hospitalization_id
+        LEFT JOIN
+            bill ON hospitalization_bill.bill_id = bill.id
+        LEFT JOIN
+            payment ON bill.id = payment.bill_id
+        LEFT JOIN
+            surgery ON hospitalization.id = surgery.hospitalization_id
+        LEFT JOIN
+            prescription ON hospitalization.id = prescription.hospitalization_id
+        WHERE
+            hospitalization.assistant_employee_vital_vue_user_id IN (SELECT employee_vital_vue_user_id FROM assistant)
+        GROUP BY
+            date(scheduled_date);
+    '''
+    connection = connect_db()
+    cursor = connection.cursor()
 
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement)
+        rows = cursor.fetchall()
 
-        results = []
-        response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+        if len(rows) == 0:
+            results = list(map(lambda row: {
+                'amount_spent': row[0],
+                'surgeries': row[1],
+                'prescriptions': row[2]
+                }, rows))
+        else:
+            results = 'No available hospitalizations'
+
+        response = {
+                'status': StatusCode.SUCCESS.value,
+                'results': results
+                }
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'GET {request.path} - error: {error}')
@@ -753,47 +783,83 @@ def daily_summary(year_month_day):
                     'errors': str(error)}
 
     finally:
-        if conn is not None:
-            conn.close()
+        if connection is not None:
+            connection.close()
 
     return jsonify(response)
-
-################################################################################
-## GENERATE MONTHLY REPORT
-## -- only assistants
-## 
-################################################################################
 
 @app.route('/report/', methods = ['GET'])
 @jwt_required()
 def generate_monthly_report():
-    logger.info(f'GET {request.path}')
+    r'''
+    Generate monthly report
+
+    Get a list of the doctors with more surgeries each month in the last 12
+    months. Just one SQL query should be used to obtain the information. Only
+    assistants can use this endpoint.
+    '''
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
-    identity = get_jwt_identity()
-    payload = request.get_json()
+    individualType = token.get('type')
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    if individualType != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'Only assistants can use this endpoint'}
+        return jsonify(response)
 
-    statement = ""
-    values = ""
+    statement = '''
+        SELECT
+            EXTRACT(MONTH FROM s.scheduled_date) AS Mês,
+            e.name as "Nome do Doctor",
+            COUNT(s.scheduled_date) as "Total de cirurgias"
+        FROM
+            employee e
+        JOIN
+            doctor d ON e.vital_vue_user_id = d.employee_vital_vue_user_id
+        JOIN
+            surgery s ON d.employee_vital_vue_user_id = s.doctor_employee_vital_vue_user_id
+        WHERE
+            s.scheduled_date >= DATE_TRUNC('month', NOW() - INTERVAL '12 months')
+        GROUP BY
+            e.name, EXTRACT(MONTH FROM s.scheduled_date)
+        ORDER BY
+            "Total de cirurgias" DESC;
+    '''
+
+    connection = connect_db()
+    cursor = connection.cursor()
 
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement)
+        rows = cursor.fetchall()
 
         results = []
-        response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+        if rows:
+            for row in rows:
+                results.append({
+                    'month': row[0],
+                    'doctor': row[1],
+                    'surgeries': row[2]
+                    })
+
+        if len(results) == 0:
+            results = 'No available surgeries in the last 12 months'
+
+        response = {
+                'status': StatusCode.SUCCESS.value,
+                'results': results
+                }
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'GET {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
     finally:
-        if conn is not None:
-            conn.close()
+        if connection is not None:
+            connection.close()
 
     return jsonify(response)
 
