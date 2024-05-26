@@ -728,42 +728,78 @@ def daily_summary(year_month_day):
 
     return jsonify(response)
 
-################################################################################
-## GENERATE MONTHLY REPORT
-## -- only assistants
-## 
-################################################################################
-
 @app.route('/report/', methods = ['GET'])
 @jwt_required()
 def generate_monthly_report():
-    logger.info(f'GET {request.path}')
+    r'''
+    Generate monthly report
+
+    Get a list of the doctors with more surgeries each month in the last 12
+    months. Just one SQL query should be used to obtain the information. Only
+    assistants can use this endpoint.
+    '''
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
-    identity = get_jwt_identity()
-    payload = request.get_json()
+    individualType = token.get('type')
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    if individualType != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'Only assistants can use this endpoint'}
+        return jsonify(response)
 
-    statement = ""
-    values = ""
+    statement = '''
+        SELECT
+            EXTRACT(MONTH FROM s.scheduled_date) AS Mês,
+            e.name as "Nome do Doctor",
+            COUNT(s.scheduled_date) as "Total de cirurgias"
+        FROM
+            employee e
+        JOIN
+            doctor d ON e.vital_vue_user_id = d.employee_vital_vue_user_id
+        JOIN
+            surgery s ON d.employee_vital_vue_user_id = s.doctor_employee_vital_vue_user_id
+        WHERE
+            s.scheduled_date >= DATE_TRUNC('month', NOW() - INTERVAL '12 months')
+        GROUP BY
+            e.name, EXTRACT(MONTH FROM s.scheduled_date)
+        ORDER BY
+            "Total de cirurgias" DESC;
+    '''
+
+    connection = connect_db()
+    cursor = connection.cursor()
 
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement)
+        rows = cursor.fetchall()
 
         results = []
-        response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+        if rows:
+            for row in rows:
+                results.append({
+                    'month': row[0],
+                    'doctor': row[1],
+                    'surgeries': row[2]
+                    })
+
+        if len(results) == 0:
+            results = 'No available surgeries in the last 12 months'
+
+        response = {
+                'status': StatusCode.SUCCESS.value,
+                'results': results
+                }
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'GET {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
     finally:
-        if conn is not None:
-            conn.close()
+        if connection is not None:
+            connection.close()
 
     return jsonify(response)
 
