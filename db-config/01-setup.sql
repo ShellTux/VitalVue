@@ -46,7 +46,7 @@ CREATE TABLE surgery (
 	start_time			 TIMESTAMP NOT NULL,
 	end_time				 TIMESTAMP NOT NULL,
 	patient_vital_vue_user_id	 BIGINT NOT NULL,
-	hospitalization_id		 BIGINT NOT NULL,
+	hospitalization_id		 BIGINT,
 	doctor_employee_vital_vue_user_id BIGINT NOT NULL,
 	PRIMARY KEY(id)
 );
@@ -162,7 +162,6 @@ ALTER TABLE surgery ADD CONSTRAINT surgery_fk1 FOREIGN KEY (patient_vital_vue_us
 ALTER TABLE surgery ADD CONSTRAINT surgery_fk2 FOREIGN KEY (hospitalization_id) REFERENCES hospitalization(id);
 ALTER TABLE surgery ADD CONSTRAINT surgery_fk3 FOREIGN KEY (doctor_employee_vital_vue_user_id) REFERENCES doctor(employee_vital_vue_user_id);
 ALTER TABLE hospitalization ADD CONSTRAINT hospitalization_fk1 FOREIGN KEY (patient_vital_vue_user_id) REFERENCES patient(vital_vue_user_id);
-ALTER TABLE hospitalization ADD CONSTRAINT hospitalization_fk2 FOREIGN KEY (assistant_employee_vital_vue_user_id) REFERENCES assistant(employee_vital_vue_user_id);
 ALTER TABLE hospitalization ADD CONSTRAINT hospitalization_fk3 FOREIGN KEY (nurse_employee_vital_vue_user_id) REFERENCES nurse(employee_vital_vue_user_id);
 ALTER TABLE nurse_role ADD CONSTRAINT nurse_role_fk1 FOREIGN KEY (appointment_id) REFERENCES appointment(id);
 ALTER TABLE nurse_role ADD CONSTRAINT nurse_role_fk2 FOREIGN KEY (nurse_employee_vital_vue_user_id) REFERENCES nurse(employee_vital_vue_user_id);
