@@ -134,14 +134,14 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION create_hospitalization_if_needed()
 RETURNS TRIGGER AS $$
 DECLARE
-    v_hospitalization_id integer;
+    gen_hospitalization_id BIGINT;
 BEGIN
     IF NEW.hospitalization_id IS NULL THEN
-        INSERT INTO hospitalization (patient_id)
+        INSERT INTO hospitalization (patient_vital_vue_user_id)
         VALUES (NEW.patient_vital_vue_user_id)
-        RETURNING hospitalization_id INTO v_hospitalization_id;
+        RETURNING id INTO gen_hospitalization_id;
         
-        NEW.hospitalization_id = v_hospitalization_id;
+        NEW.hospitalization_id = gen_hospitalization_id;
     END IF;
     
     RETURN NEW;

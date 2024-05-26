@@ -52,10 +52,9 @@ CREATE TABLE surgery (
 );
 
 CREATE TABLE hospitalization (
-	id					 BIGSERIAL,
-	patient_vital_vue_user_id		 BIGINT NOT NULL,
-	assistant_employee_vital_vue_user_id BIGINT NOT NULL,
-	nurse_employee_vital_vue_user_id	 BIGINT NOT NULL,
+	id				 BIGSERIAL,
+	patient_vital_vue_user_id	 BIGINT NOT NULL,
+	nurse_employee_vital_vue_user_id BIGINT,
 	PRIMARY KEY(id)
 );
 

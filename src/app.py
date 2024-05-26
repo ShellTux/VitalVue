@@ -469,7 +469,7 @@ def schedule_surgery(hospitalization_id):
         column_substr = 'hospitalization_id'
         index = statement.find(column_substr)
         statement = statement[:index] + statement[index + len(column_substr):]
-        statement.replace('end_time,', 'end_time')
+        statement = statement.replace('end_time,', 'end_time')
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
@@ -484,9 +484,9 @@ def schedule_surgery(hospitalization_id):
     input_values = [payload[key] for key in key_values]
     if hospitalization_id is not None:
         input_values.append(hospitalization_id)
-        statement.replace('<, %s>', ', %s')
+        statement = statement.replace("<, %s>", ", %s")
     else:
-        statement.replace('<, %s>', '')
+        statement = statement.replace("<, %s>", "")
     input_nurses = [item for nurse in nurses for item in nurse]
     input_values.extend(input_nurses)
 
