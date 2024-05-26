@@ -417,19 +417,56 @@ def schedule_surgery(hospitalization_id):
     # 3. get request payload
     payload = request.get_json()
 
-    # 4. query statement and key values
+    # 4. key values
+    key_values = ['patient_user_id', 
+                  'doctor_user_id', 
+                  'nurses', 
+                  'date', 
+                  'start_time', 
+                  'end_time']
+    
+    # 5. validate payload
+    response = validate_payload(payload, key_values)
+    if response:
+        return jsonify(response)
+    
+    # 6. get input values
+    payload['start_time'] = payload['date'] + ' ' + payload['start_time']
+    payload['end_time'] = payload['date'] + ' ' + payload['end_time']
+
+    nurses = payload['nurses']
+    key_values.remove('nurses')
+    input_values = [payload[key] for key in key_values]
+
+    input_nurses = [item for nurse in nurses for item in nurse]
+    input_values.extend(input_nurses)
+
+    # 7. update statement params and input based on hospitalization id
+    if hospitalization_id is not None:
+        num_params = 6
+        hosp_id_column = 'hospitalization_id,'
+        # insert hospitalization at beginning of list
+        input_values.insert(0, hospitalization_id)
+    else:
+        num_params = 5
+        hosp_id_column = ''
+
+    surgery_params = ', '.join(['%s'] * num_params)
+    nurse_params = ', '.join(['(%s, %s)' for _ in nurses])
+
+    # 8. build final query statement
     statement = """
                 WITH new_surgery AS (
                     INSERT INTO surgery (
+                        {hosp_id_column}
                         patient_vital_vue_user_id,
                         doctor_employee_vital_vue_user_id,
                         scheduled_date,
                         start_time,
-                        end_time,
-                        hospitalization_id
+                        end_time
                     )
                     VALUES (
-                        %s, %s, %s, %s, %s<, %s>
+                        {surgery_params}
                     )
                     RETURNING
                         hospitalization_id,
@@ -449,7 +486,10 @@ def schedule_surgery(hospitalization_id):
                         role
                     FROM 
                         new_surgery ns,
-                        (VALUES <nurse_values>) AS nurse_role(nurse_employee_vital_vue_user_id, role)
+                        (VALUES {nurse_params}) AS nurse_role(
+                            nurse_employee_vital_vue_user_id, 
+                            role
+                            )
                     RETURNING
                         1
                 )
@@ -462,46 +502,17 @@ def schedule_surgery(hospitalization_id):
                 FROM
                     new_surgery;
                 """
-    key_values = ['patient_user_id', 'doctor_user_id', 'nurses', 
-                  'date', 'start_time', 'end_time']
-    if hospitalization_id is None:
-        # remove 'hospitalization_id' column from statement
-        column_substr = 'hospitalization_id'
-        index = statement.find(column_substr)
-        statement = statement[:index] + statement[index + len(column_substr):]
-        statement = statement.replace('end_time,', 'end_time')
-
-    # 5. validate payload
-    response = validate_payload(payload, key_values)
-    if response:
-        return jsonify(response)
-    
-    # 6. get input values
-    payload['start_time'] = payload['date'] + ' ' + payload['start_time']
-    payload['end_time'] = payload['date'] + ' ' + payload['end_time']
-
-    nurses = payload['nurses']
-    key_values.remove('nurses')
-
-    input_values = [payload[key] for key in key_values]
-    if hospitalization_id is not None:
-        input_values.append(hospitalization_id)
-        statement = statement.replace("<, %s>", ", %s")
-    else:
-        statement = statement.replace("<, %s>", "")
-
-    nurses_statement = ', '.join(['(%s, %s)' for _ in nurses])
-    statement = statement.replace('<nurse_values>', nurses_statement)
-    
-    input_nurses = [item for nurse in nurses for item in nurse]
-    input_values.extend(input_nurses)
-
-    logging.debug(statement)
-    logging.debug(input_values)
+    # format statement with params
+    statement = statement.format(hosp_id_column=hosp_id_column, 
+                                 surgery_params=surgery_params, 
+                                 nurse_params=nurse_params)
 
     # 7. connect to database
     conn = connect_db()
     cursor = conn.cursor()
+
+    logging.debug(statement)
+    logging.debug(input_values)
 
     try:
         cursor.execute(statement, input_values)
