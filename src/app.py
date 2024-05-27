@@ -486,12 +486,10 @@ def schedule_surgery(hospitalization_id):
                         role
                     FROM 
                         new_surgery ns,
-                        (VALUES {nurse_params}) AS nurse_role(
+                        (VALUES {nurse_params}) AS nurse_role (
                             nurse_employee_vital_vue_user_id, 
                             role
-                            )
-                    RETURNING
-                        1
+                        )
                 )
                 SELECT 
                     hospitalization_id,
@@ -642,8 +640,19 @@ def add_prescription():
         return jsonify(response)
 
     # 6. get input values
-    medicines = payload['medicines']
+    raw_medicines = payload['medicines']
     key_values.remove('medicines')
+
+    med_key_values = ['medicine',
+                      'posology_dose',
+                      'posology_frequency']
+    
+    medicines = []
+    for raw_med in raw_medicines:
+        response = validate_payload(raw_med, med_key_values)
+        if response:
+            return jsonify(response)
+        medicines.append([raw_med[key] for key in med_key_values])
 
     event_type = payload['type']
     key_values.remove('type')
@@ -673,7 +682,7 @@ def add_prescription():
                         %s, %s
                     )
                     RETURNING 
-                        prescription_id
+                        id
                 ), new_posology AS (
                     INSERT INTO 
                         med_posology (
@@ -682,31 +691,27 @@ def add_prescription():
                             dose,
                             frequency
                         )
-                    SELECT (
+                    SELECT
                         np.id,
-                        medication_name,
-                        dose,
-                        frequency
-                    )
-                    FROM (
-                        new_prescription AS np,
-                        VALUES ({med_pos_params}) AS med_posology (
+                        mp.medication_name,
+                        mp.dose,
+                        mp.frequency
+                    FROM
+                        new_prescription np,
+                        (VALUES {med_pos_params}) AS mp (
                             medication_name,
                             dose,
                             frequency
                         )
-                    RETURNING
-                        1
-                    )
                 )
                 SELECT 
                     id
                 FROM
-                    new_prescription
+                    new_prescription;
                 """
     # format statement with params
-    statement.format(event_id_column=event_id_column, 
-                     med_pos_params=med_pos_params)
+    statement = statement.format(event_id_column=event_id_column, 
+                                 med_pos_params=med_pos_params)
 
     # 8. connect to database
     conn = connect_db()

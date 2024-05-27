@@ -35,7 +35,7 @@ CREATE TABLE appointment (
 	end_time				 TIMESTAMP NOT NULL,
 	cost				 BIGINT NOT NULL,
 	patient_vital_vue_user_id	 BIGINT NOT NULL,
-	bill_id				 BIGINT NOT NULL,
+	bill_id				 BIGINT,
 	doctor_employee_vital_vue_user_id BIGINT NOT NULL,
 	PRIMARY KEY(id)
 );
@@ -68,9 +68,9 @@ CREATE TABLE nurse_role (
 CREATE TABLE prescription (
 	id			 BIGSERIAL,
 	validity_date		 DATE NOT NULL,
-	patient_vital_vue_user_id BIGINT NOT NULL,
-	hospitalization_id	 BIGINT NOT NULL,
-	appointment_id		 BIGINT NOT NULL,
+	patient_vital_vue_user_id BIGINT,
+	hospitalization_id	 BIGINT,
+	appointment_id		 BIGINT,
 	PRIMARY KEY(id)
 );
 
@@ -118,7 +118,7 @@ CREATE TABLE med_posology (
 	frequency	 BIGINT NOT NULL,
 	medication_name TEXT,
 	prescription_id BIGINT NOT NULL,
-	PRIMARY KEY(medication_name)
+	PRIMARY KEY(medication_name, prescription_id)
 );
 
 CREATE TABLE vital_vue_user (
