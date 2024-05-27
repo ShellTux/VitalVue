@@ -22,8 +22,6 @@ class IndividualTypes(StrEnum):
 
     @classmethod
     def values_handlers(cls):
-        base = ['username', 'email', 'password']
-        base_employee = base.append(['contract_details', 'username'])
         return {
                 cls.DOCTOR:    ['username', 'password', 'email', 
                                 'name', 'contract_details',
