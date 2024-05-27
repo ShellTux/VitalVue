@@ -557,7 +557,7 @@ def get_prescriptions(person_id):
     type = get_jwt().get('type')
 
     # 2. check if patient is target patient
-    if type == IndividualTypes.PATIENT and id != person_id:
+    if type == IndividualTypes.PATIENT and str(id) != person_id:
         return jsonify({'status': StatusCode.API_ERROR.value, 
                         'errors': 'Only the target patient can use this endpoint'})
 
@@ -568,7 +568,7 @@ def get_prescriptions(person_id):
                     p.validity_date,
                     mp.dose,
                     mp.frequency,
-                    mp.medicine_name
+                    mp.medication_name
                 FROM 
                     prescription AS p
                 LEFT JOIN
@@ -598,7 +598,7 @@ def get_prescriptions(person_id):
                            'medicine': row[4]}
                 results.append(content)
         else:
-            results = 'This patient has no prescriptions'
+            results = 'No prescriptions'
         
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
