@@ -42,6 +42,7 @@ from IndividualTypes import IndividualTypes
 import logging
 from logging.config import fileConfig
 import psycopg2
+import hashlib
 
 CONFIG = dotenv_values('.env')
 
@@ -81,6 +82,11 @@ def validate_payload(payload, values):
             return {'status': StatusCode.API_ERROR.value,
                     'results': f'{value} value not in payload'}
     return {}
+
+def hash_password(password):
+    password_bytes = password.encode()
+    encoded = hashlib.md5(password_bytes)
+    return encoded.hexdigest()
 
 ################################################################################
 ## LANDING PAGE
@@ -137,6 +143,7 @@ def register(registration_type: str):
         return jsonify(input_values)
 
     # 5. get input values from payload
+    payload['password'] = hash_password(payload['password'])
     input_values = [payload[key] for key in key_values]
 
     # 6. connect to database
@@ -201,6 +208,7 @@ def user_authentication():
         return jsonify(response)
 
     # 5. get input values from payload
+    payload['password'] = hash_password(payload['password'])
     input_values = [payload[key] for key in key_values]
 
     # 6. connect to database
@@ -266,15 +274,18 @@ def schedule_appointment():
                         scheduled_date,
                         start_time,
                         end_time,
+                        cost,
                         patient_vital_vue_user_id
                     )
                 VALUES (
-                    %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s
                 )
-                RETURNING id;
+                RETURNING 
+                    id;
                 """
     key_values = ['doctor_id', 'date', 
-                  'start_time', 'end_time']
+                  'start_time', 'end_time', 
+                  'cost']
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
@@ -406,8 +417,8 @@ def schedule_surgery(hospitalization_id):
 
     # 4. query statement and key values
     statement = """
-                INSERT INTO 
-                    surgery (
+                WITH new_surgery AS (
+                    INSERT INTO surgery (
                         patient_vital_vue_user_id,
                         doctor_employee_vital_vue_user_id,
                         scheduled_date,
@@ -415,18 +426,41 @@ def schedule_surgery(hospitalization_id):
                         end_time,
                         hospitalization_id
                     )
-                VALUES (
-                    %s, %s, %s, %s, %s, %s
+                    VALUES (
+                        %s, %s, %s, %s, %s, %s
+                    )
+                    RETURNING
+                        id
                 )
-                RETURNING 
+                INSERT INTO nurse_role (
+                    surgery_id,
+                    nurse_employee_vital_vue_user_id,
+                    role
+                )
+                SELECT
+                    ns.id,
+                    nurse_employee_vital_vue_user_id,
+                    role
+                FROM 
+                    new_surgery ns,
+                    (VALUES (%s, %s)) AS nurse_role(nurse_employee_vital_vue_user_id, role);
+                SELECT 
                     hospitalization_id,
                     id,
                     patient_vital_vue_user_id,
                     doctor_employee_vital_vue_user_id,
-                    scheduled_date;
+                    scheduled_date
+                FROM
+                    new_surgery;
                 """
-    key_values = ['patient_user_id', 'doctor_user_id', 
+    key_values = ['patient_user_id', 'doctor_user_id', 'nurses', 
                   'date', 'start_time', 'end_time']
+    if hospitalization_id is None:
+        # remove 'hospitalization_id' column from statement
+        column_substr = 'hospitalization_id'
+        index = statement.find(column_substr)
+        statement = statement[:index] + statement[index + len(column_substr):]
+        statement.replace('end_time,', 'end_time')
 
     # 5. validate payload
     response = validate_payload(payload, key_values)
@@ -436,9 +470,16 @@ def schedule_surgery(hospitalization_id):
     # 6. get input values
     payload['start_time'] = payload['date'] + ' ' + payload['start_time']
     payload['end_time'] = payload['date'] + ' ' + payload['end_time']
+    nurses = payload['nurses']
+    key_values.remove('nurses')
     input_values = [payload[key] for key in key_values]
     if hospitalization_id is not None:
         input_values.append(hospitalization_id)
+    input_nurses = [item for nurse in nurses for item in nurse]
+    input_values.extend(input_nurses)
+
+    logging.debug(statement)
+    logging.debug(input_values)
 
     # 7. connect to database
     conn = connect_db()
@@ -648,33 +689,72 @@ def list_top3_patients():
 
     return jsonify(response)
 
-################################################################################
-## DAILY SUMMARY
-## -- only assistants
-## 
-################################################################################
-
 @app.route('/daily/<year_month_day>/', methods = ['GET'])
 @jwt_required()
-def daily_summary(year_month_day):
-    logger.info(f'GET {request.path}')
+def daily_summary(year_month_day: str):
+    r'''
+    Daily Summary.
+
+    List a count for all hospitalizations details of a given day. Consider,
+    surgeries, payments, and prescriptions. Just one SQL query should be used to
+    obtain the information. Only assistants can use this endpoint.
+    '''
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
     identity = get_jwt_identity()
-    payload = request.get_json()
+    individual_type = token.get('type')
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    if individual_type != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': "You don't have permission to see daily summary"}
+        return jsonify(response)
 
-    statement = ""
-    values = ""
+    # TODO: This sql statement gives all results grouped by date, not by the
+    # given day.
+    statement = '''
+        SELECT
+            SUM(payment.amount) AS "Amount Spent",
+            COUNT(surgery.id) AS "Surgeries",
+            COUNT(prescription.id) AS Prescriptions
+        FROM
+            hospitalization
+        LEFT JOIN
+            hospitalization_bill ON hospitalization.id = hospitalization_bill.hospitalization_id
+        LEFT JOIN
+            bill ON hospitalization_bill.bill_id = bill.id
+        LEFT JOIN
+            payment ON bill.id = payment.bill_id
+        LEFT JOIN
+            surgery ON hospitalization.id = surgery.hospitalization_id
+        LEFT JOIN
+            prescription ON hospitalization.id = prescription.hospitalization_id
+        WHERE
+            hospitalization.assistant_employee_vital_vue_user_id IN (SELECT employee_vital_vue_user_id FROM assistant)
+        GROUP BY
+            date(scheduled_date);
+    '''
+    connection = connect_db()
+    cursor = connection.cursor()
 
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement)
+        rows = cursor.fetchall()
 
-        results = []
-        response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+        if len(rows) == 0:
+            results = list(map(lambda row: {
+                'amount_spent': row[0],
+                'surgeries': row[1],
+                'prescriptions': row[2]
+                }, rows))
+        else:
+            results = 'No available hospitalizations'
+
+        response = {
+                'status': StatusCode.SUCCESS.value,
+                'results': results
+                }
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'GET {request.path} - error: {error}')
@@ -682,47 +762,83 @@ def daily_summary(year_month_day):
                     'errors': str(error)}
 
     finally:
-        if conn is not None:
-            conn.close()
+        if connection is not None:
+            connection.close()
 
     return jsonify(response)
-
-################################################################################
-## GENERATE MONTHLY REPORT
-## -- only assistants
-## 
-################################################################################
 
 @app.route('/report/', methods = ['GET'])
 @jwt_required()
 def generate_monthly_report():
-    logger.info(f'GET {request.path}')
+    r'''
+    Generate monthly report
+
+    Get a list of the doctors with more surgeries each month in the last 12
+    months. Just one SQL query should be used to obtain the information. Only
+    assistants can use this endpoint.
+    '''
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
-    identity = get_jwt_identity()
-    payload = request.get_json()
+    individualType = token.get('type')
 
-    conn = connect_db()
-    cursor = conn.cursor()
+    if individualType != IndividualTypes.ASSISTANT:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'Only assistants can use this endpoint'}
+        return jsonify(response)
 
-    statement = ""
-    values = ""
+    statement = '''
+        SELECT
+            EXTRACT(MONTH FROM s.scheduled_date) AS Mês,
+            e.name as "Nome do Doctor",
+            COUNT(s.scheduled_date) as "Total de cirurgias"
+        FROM
+            employee e
+        JOIN
+            doctor d ON e.vital_vue_user_id = d.employee_vital_vue_user_id
+        JOIN
+            surgery s ON d.employee_vital_vue_user_id = s.doctor_employee_vital_vue_user_id
+        WHERE
+            s.scheduled_date >= DATE_TRUNC('month', NOW() - INTERVAL '12 months')
+        GROUP BY
+            e.name, EXTRACT(MONTH FROM s.scheduled_date)
+        ORDER BY
+            "Total de cirurgias" DESC;
+    '''
+
+    connection = connect_db()
+    cursor = connection.cursor()
 
     try:
-        cursor.execute(statement, values)
+        cursor.execute(statement)
+        rows = cursor.fetchall()
 
         results = []
-        response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+        if rows:
+            for row in rows:
+                results.append({
+                    'month': row[0],
+                    'doctor': row[1],
+                    'surgeries': row[2]
+                    })
+
+        if len(results) == 0:
+            results = 'No available surgeries in the last 12 months'
+
+        response = {
+                'status': StatusCode.SUCCESS.value,
+                'results': results
+                }
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'GET {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
     finally:
-        if conn is not None:
-            conn.close()
+        if connection is not None:
+            connection.close()
 
     return jsonify(response)
 
