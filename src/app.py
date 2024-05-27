@@ -486,12 +486,10 @@ def schedule_surgery(hospitalization_id):
                         role
                     FROM 
                         new_surgery ns,
-                        (VALUES {nurse_params}) AS nurse_role(
+                        (VALUES {nurse_params}) AS nurse_role (
                             nurse_employee_vital_vue_user_id, 
                             role
-                            )
-                    RETURNING
-                        1
+                        )
                 )
                 SELECT 
                     hospitalization_id,
@@ -617,27 +615,123 @@ def get_prescriptions(person_id):
 def add_prescription():
     logger.info(f'POST {request.path}')
 
-    token = get_jwt()
-    identity = get_jwt_identity()
+    # 1. get token data
+    id = get_jwt_identity()
+    type = get_jwt().get('type')
+
+    # 2. validate caller
+    if type != IndividualTypes.DOCTOR:
+        response = {'status': StatusCode.API_ERROR.value, 
+                    'errors': 'Only doctors can access this endpoint'}
+        return jsonify(response)
+    
+    # 3. get request payload
     payload = request.get_json()
 
+    # 4. key values
+    key_values = ['type', 
+                  'event_id', 
+                  'validity',
+                  'medicines']
+    
+    # 5. validate payload
+    response = validate_payload(payload, key_values)
+    if response:
+        return jsonify(response)
+
+    # 6. get input values
+    raw_medicines = payload['medicines']
+    key_values.remove('medicines')
+
+    med_key_values = ['medicine',
+                      'posology_dose',
+                      'posology_frequency']
+    
+    medicines = []
+    for raw_med in raw_medicines:
+        response = validate_payload(raw_med, med_key_values)
+        if response:
+            return jsonify(response)
+        medicines.append([raw_med[key] for key in med_key_values])
+
+    event_type = payload['type']
+    key_values.remove('type')
+
+    input_values = [payload[key] for key in key_values]
+
+    input_medicines = [item for med in medicines for item in med]
+    input_values.extend(input_medicines)
+
+    # 7. update statement params and input based on event type
+    if event_type == 'appointment':
+        event_id_column = 'appointment_id'
+    else:
+        event_id_column = 'hospitalization_id'
+    
+    med_pos_params = ', '.join(['(%s, %s, %s)' for _ in medicines])
+
+    # 4. query statement and key values
+    statement = """
+                WITH new_prescription AS (
+                    INSERT INTO
+                        prescription (
+                            {event_id_column},
+                            validity_date
+                        )
+                    VALUES (
+                        %s, %s
+                    )
+                    RETURNING 
+                        id
+                ), new_posology AS (
+                    INSERT INTO 
+                        med_posology (
+                            prescription_id,
+                            medication_name,
+                            dose,
+                            frequency
+                        )
+                    SELECT
+                        np.id,
+                        mp.medication_name,
+                        mp.dose,
+                        mp.frequency
+                    FROM
+                        new_prescription np,
+                        (VALUES {med_pos_params}) AS mp (
+                            medication_name,
+                            dose,
+                            frequency
+                        )
+                )
+                SELECT 
+                    id
+                FROM
+                    new_prescription;
+                """
+    # format statement with params
+    statement = statement.format(event_id_column=event_id_column, 
+                                 med_pos_params=med_pos_params)
+
+    # 8. connect to database
     conn = connect_db()
     cursor = conn.cursor()
 
-    statement = ""
-    values = ""
+    logging.debug(statement)
+    logging.debug(input_values)
 
     try:
-        cursor.execute(statement, values)
-
-        results = []
+        cursor.execute(statement, input_values)
+        prescription_id = cursor.fetchone()[0]
         response = {'status': StatusCode.SUCCESS.value, 
-                    'results': results}
+                    'results': prescription_id}
+        conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
         logger.error(f'POST {request.path} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
+        conn.rollback()
 
     finally:
         if conn is not None:

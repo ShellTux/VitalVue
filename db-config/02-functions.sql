@@ -157,3 +157,14 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Create medicine after creating new med posology if medicine does not exist
+CREATE OR REPLACE FUNCTION create_medicine_if_needed()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF NOT EXISTS (SELECT name FROM medication WHERE name = NEW.medication_name) THEN
+		INSERT INTO medication (name) VALUES (NEW.medication_name);
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
