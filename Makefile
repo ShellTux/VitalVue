@@ -33,7 +33,7 @@ $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL): %.pdf: docs/%.md
 	pandoc $(PANDOC_OPTS) --output=$@ $<
 
 $(PRESENTATION): %.pdf: docs/%.md
-	pandoc $(PANDOC_OPTS) --output=$@ --from=markdown --to=beamer
+	pandoc $(PANDOC_OPTS) --to=beamer --output=$@ $<
 
 .PHONY: archive
 archive: $(ARCHIVE)
