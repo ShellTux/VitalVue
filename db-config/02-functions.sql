@@ -158,6 +158,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Associate patient with prescription
+CREATE OR REPLACE FUNCTION associate_patient_with_prescription()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF NEW.appointment_id IS NOT NULL THEN
+		SELECT patient_vital_vue_user_id INTO NEW.patient_vital_vue_user_id
+        FROM appointment
+        WHERE id = NEW.appointment_id;
+	ELSIF NEW.hospitalization_id IS NOT NULL THEN
+		SELECT patient_vital_vue_user_id INTO NEW.patient_vital_vue_user_id
+        FROM hospitalization
+        WHERE id = NEW.hospitalization_id;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Create medicine after creating new med posology if medicine does not exist
 CREATE OR REPLACE FUNCTION create_medicine_if_needed()
 RETURNS TRIGGER AS $$
