@@ -564,12 +564,19 @@ def get_prescriptions(person_id):
     # 3. query statement and values
     statement = """
                 SELECT 
-                    p.prescription_id, 
-                    p.validity_date
+                    p.id, 
+                    p.validity_date,
+                    mp.dose,
+                    mp.frequency,
+                    mp.medicine_name
                 FROM 
                     prescription AS p
+                LEFT JOIN
+                    med_posology AS mp
+                ON
+                    p.id = mp.prescription_id
                 WHERE 
-                    p.patient_vital_vue_user_id = %s
+                    p.patient_vital_vue_user_id = %s;
                 """
     values = (person_id,)
     
@@ -585,7 +592,10 @@ def get_prescriptions(person_id):
             results = []
             for row in rows:
                 content = {'prescription_id': row[0], 
-                           'validity_date': row[1]}
+                           'validity_date': row[1],
+                           'dose': row[2],
+                           'frequency': row[3],
+                           'medicine': row[4]}
                 results.append(content)
         else:
             results = 'This patient has no prescriptions'
