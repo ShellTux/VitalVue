@@ -3,6 +3,8 @@ set -e
 
 all_endpoints() {
 	echo 'register/doctor/'
+	echo 'daily/{year-month-day}/'
+	echo 'report/'
 }
 
 usage() {
@@ -45,6 +47,12 @@ do
 				name="$name" \
 				password="$password" \
 				username="$user_name"
+			;;
+		daily/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/)
+			curlie get "$url"
+			;;
+		report/)
+			curlie get "$url"
 			;;
 		*) usage ;;
 	esac
