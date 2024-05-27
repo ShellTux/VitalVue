@@ -592,7 +592,10 @@ def get_prescriptions(person_id):
             results = []
             for row in rows:
                 content = {'prescription_id': row[0], 
-                           'validity_date': row[1]}
+                           'validity_date': row[1],
+                           'dose': row[2],
+                           'frequency': row[3],
+                           'medicine': row[4]}
                 results.append(content)
         else:
             results = 'This patient has no prescriptions'
