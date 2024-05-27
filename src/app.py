@@ -565,7 +565,7 @@ def get_prescriptions(person_id):
     statement = """
                 SELECT 
                     p.id, 
-                    p.validity_date
+                    p.validity_date,
                     mp.dose,
                     mp.frequency,
                     mp.medicine_name
@@ -576,7 +576,7 @@ def get_prescriptions(person_id):
                 ON
                     p.id = mp.prescription_id
                 WHERE 
-                    p.patient_vital_vue_user_id = %s
+                    p.patient_vital_vue_user_id = %s;
                 """
     values = (person_id,)
     
