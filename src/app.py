@@ -658,23 +658,55 @@ def add_prescription():
         event_id_column = 'appointment_id'
     else:
         event_id_column = 'hospitalization_id'
+    
+    med_pos_params = ', '.join(['(%s, %s, %s)' for _ in medicines])
 
     # 4. query statement and key values
     statement = """
-                INSERT INTO
-                    prescription (
-                        {event_id_column},
-                        validity_date
+                WITH new_prescription AS (
+                    INSERT INTO
+                        prescription (
+                            {event_id_column},
+                            validity_date
+                        )
+                    VALUES (
+                        %s, %s
                     )
-                VALUES (
-                    %s, %s
+                    RETURNING 
+                        prescription_id
+                ), new_posology AS (
+                    INSERT INTO 
+                        med_posology (
+                            prescription_id,
+                            medication_name,
+                            dose,
+                            frequency
+                        )
+                    SELECT (
+                        np.id,
+                        medication_name,
+                        dose,
+                        frequency
+                    )
+                    FROM (
+                        new_prescription AS np,
+                        VALUES ({med_pos_params}) AS med_posology (
+                            medication_name,
+                            dose,
+                            frequency
+                        )
+                    RETURNING
+                        1
+                    )
                 )
-                RETURNING 
-                    prescription_id
+                SELECT 
+                    id
+                FROM
+                    new_prescription
                 """
     # format statement with params
     statement.format(event_id_column=event_id_column, 
-                     )
+                     med_pos_params=med_pos_params)
 
     # 8. connect to database
     conn = connect_db()
