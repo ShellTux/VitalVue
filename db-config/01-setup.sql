@@ -67,8 +67,8 @@ CREATE TABLE prescription (
 	id			 BIGSERIAL,
 	validity_date		 DATE NOT NULL,
 	patient_vital_vue_user_id BIGINT NOT NULL,
-	hospitalization_id	 BIGINT NOT NULL,
-	appointment_id		 BIGINT NOT NULL,
+	hospitalization_id	 BIGINT,
+	appointment_id		 BIGINT,
 	PRIMARY KEY(id)
 );
 
@@ -178,4 +178,3 @@ ALTER TABLE specialization_specialization ADD CONSTRAINT specialization_speciali
 ALTER TABLE specialization_specialization ADD CONSTRAINT specialization_specialization_fk2 FOREIGN KEY (specialization_field1) REFERENCES specialization(field);
 ALTER TABLE doctor_specialization ADD CONSTRAINT doctor_specialization_fk1 FOREIGN KEY (doctor_employee_vital_vue_user_id) REFERENCES doctor(employee_vital_vue_user_id);
 ALTER TABLE doctor_specialization ADD CONSTRAINT doctor_specialization_fk2 FOREIGN KEY (specialization_field) REFERENCES specialization(field);
-
