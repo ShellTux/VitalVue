@@ -13,11 +13,21 @@ date: \today
 
 1. Download Postman
 2. Open Postman and go to workspace
-3. Import collection file: `VitalVue/postman/VitalVue.postman_collection.json`
+3. Import collection files found in: `VitalVue/postman/`
 
-## Collection Structure
+## Running Collections
 
-The individual requests can be found in order of execution.
+With the collections imported you can run them seperately in order or out of order. This is the recommended order:
+
+1. Vital Vue Register
+2. Vital Vue Appointments
+3. Vital Vue Surgeries
+4. Vital Vue Prescriptions
+5. Vital Vue Stats
+
+You can run the collection by `right clicking` on them and selecting `Run collection`.
+> [!NOTE]
+> It's recommended to tick `Persist responses for a session`, so that you can see the responses for each request.
 
 ## Requests
 
@@ -107,7 +117,7 @@ Responds with the status code and the new Vital Vue User ID.
 
 #### Response
 
-Responds with the status code and the authorization token. This token will be used in the remaining requests.
+Responds with the status code and the authorization token. This token will be automatically used in the remaining requests.
 
 ### Schedule Appointment
 
@@ -202,11 +212,6 @@ Responds with the status code and the information about the patient prescription
                     "dose": 100,
                     "frequency": 2,
                     "medicine": "ben-u-ron"
-                },
-                {
-                    "dose": 100,
-                    "frequency": 2,
-                    "medicine": "aspirin"
                 }
             ],
             "validity": "Mon, 27 May 2024 00:00:00 GMT"

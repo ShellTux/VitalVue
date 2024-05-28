@@ -259,7 +259,7 @@ def schedule_appointment():
 
     # 2. validate caller
     if type != IndividualTypes.PATIENT:
-        response = {'status': StatusCode.API_ERROR, 
+        response = {'status': StatusCode.API_ERROR.value, 
                     'errors': 'Only patients can use this endpoint'}
         return jsonify(response)
     
