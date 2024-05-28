@@ -22,12 +22,12 @@ We will provide 2 ways of running and deploying our software.
 2. Setup of environment in your local machine
 <!-- 3. Docker compose stack -->
 
-## Ubuntu VM
+## Ubuntu [Recommended]
 
 ### Requirements
 
 - Operating System: [Ubuntu 24.04](https://ubuntu.com/download/desktop)
-- Python version >= 3.11 and Python venv >= 3.11 to setup the python virtual
+- Python version >= 3.12 and Python venv >= 3.12 to setup the python virtual
   environment
 ```sh
 sudo apt install python3.12 python3.12-venv
@@ -75,5 +75,13 @@ Pressing Ctrl+c will stop the flask app, but the docker compose stack will still
 be running, to stop:
 
 ```sh
+sudo docker compose stop
+```
+
+#### Docker
+
+```sh
+sudo docker compose up -d
+(. .env && venv/bin/flask --app src/app.py --env-file .env run --debug --host "$SERVER_HOST" --port "$SERVER_PORT" --with-threads)
 sudo docker compose stop
 ```
