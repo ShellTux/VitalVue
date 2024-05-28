@@ -36,7 +36,7 @@ $(PRESENTATION): %.pdf: docs/%.md
 .PHONY: archive
 archive: $(ARCHIVE)
 
-$(ARCHIVE): $(REPORT) $(PRESENTATION) $(USER_MANUAL) $(INSTALLATION_MANUAL)
+$(ARCHIVE): $(REPORT) $(PRESENTATION)
 	git archive --output=$@ $(^:%=--add-file=%) HEAD
 
 $(VENV)/bin/activate: requirements.txt
