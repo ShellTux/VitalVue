@@ -170,6 +170,7 @@ BEGIN
 		SELECT patient_vital_vue_user_id INTO NEW.patient_vital_vue_user_id
         FROM hospitalization
         WHERE id = NEW.hospitalization_id;
+	END IF;
 	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

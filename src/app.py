@@ -588,23 +588,26 @@ def get_prescriptions(person_id):
         cursor.execute(statement, values)
         rows = cursor.fetchall()
 
+        results: list | str = list()
         if rows:
-            results = []
+            resultsD: dict[tuple[str, str], list[dict[str, str]]] = {}
             for row in rows:
                 prescription_id, validity_date, dose, frequency, medicine_name = row
-                result = {
-                    "id": prescription_id,
-                    "validity": validity_date,
-                    "posology": {
-                        "dose": dose,
-                        "frequency": frequency,
-                        "medicine": medicine_name
-                    }
-                }
-                results.append(result)
+                key: tuple[str, str] = (prescription_id, validity_date)
+                resultsD.setdefault(key, list()).append({
+                    'dose': dose,
+                    'frequency': frequency,
+                    'medicine': medicine_name
+                    })
+            for key, value in resultsD.items():
+                results.append({
+                    'id': key[0],
+                    'validity': key[1],
+                    'posology': value
+                    })
         else:
             results = 'No prescriptions'
-        
+
         response = {'status': StatusCode.SUCCESS.value, 
                     'results': results}
 
