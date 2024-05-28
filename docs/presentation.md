@@ -1,151 +1,237 @@
-% Title of presentation
-% Speaker Name
-% Date of talk
+% VitalVue
+% João Alves, Luís Góis, Marco Silva
+% \today
 
 ---
 
-# Slide 1: Introduction
+# Entity Relation Diagram
 
-- This is the introduction slide
-- Use bullet points for listing key points
-
----
-
-# Slide 2: Main Points
-
-1. First main point
-2. Second main point
-3. Third main point
+![Entity Relation Diagram](/assets/er-diagram.png)
 
 ---
 
-# Slide 3: Image
+# Postgres Setup
 
-![Image Description](https://cdn.filestackcontent.com/Krg875TyRVwr5OOumHAG/convert?cache=true&crop=126%2C64%2C1187%2C593&crop_first=true&quality=90&w=1920)
+db-config:
+
+::: incremental
+
+1. `01-setup.sql`
+2. `02-functions.sql`
+3. `03-triggers.sql`
+
+:::
 
 ---
 
-# Slide 4: Code Snippet
-```python
-# Function to greet a specific person
-def greet_person(name):
-    print("Hello, " + name + "!")
+# Add Patient, Doctor, Nurse, and Assistant.
 
-# Function to calculate the square of a number
-def calculate_square(num):
-    return num ** 2
+---
 
-# Main function to demonstrate the functions
-def main():
-    # Greet the user
-    greet_person("Alice")
+# User Authentication.
 
-    # Calculate the square of a number
-    num = 5
-    result = calculate_square(num)
-    print("The square of", num, "is", result)
+---
 
-    # Display a message
-    print("This is an enhanced and more complex code snippet!")
+# Schedule Appointment.
 
-# Call the main function
-main()
+```sql
+INSERT INTO 
+    appointment (
+        doctor_employee_vital_vue_user_id,
+        scheduled_date,
+        start_time,
+        end_time,
+        cost,
+        patient_vital_vue_user_id
+    )
+VALUES (
+    %s, %s, %s, %s, %s, %s
+)
+RETURNING 
+    id;
 ```
 
 ---
 
-# Slide 5: Tables
+# See Appointments.
 
-| Name | Age | Location |
-|------|-----|----------|
-| Alice | 25  | New York |
-| Bob   | 30  | California |
-
----
-
-# Slide 6: Quotes
-
-> "Be yourself; everyone else is already taken." - Oscar Wilde
-
----
-
-# Slide 7: Emphasis
-
-- *italic text*
-- **bold text**
-- ~~crossed text~~
+```sql
+SELECT 
+    ap.id,
+    ap.doctor_employee_vital_vue_user_id,
+    ap.scheduled_date
+FROM 
+    appointment AS ap
+WHERE 
+    ap.patient_vital_vue_user_id = %s
+```
 
 ---
 
-# Slide 8: Links
-[Click here to visit our website](https://example.com)
+# Schedule Surgery.
+
+## Schedule Surgery - SQL Part 1
+
+```sql
+WITH new_surgery AS (
+    INSERT INTO surgery (
+        {hosp_id_column}
+        patient_vital_vue_user_id,
+        doctor_employee_vital_vue_user_id,
+        scheduled_date,
+        start_time,
+        end_time
+    )
+    VALUES (
+        {surgery_params}
+    )
+    RETURNING
+        hospitalization_id,
+        id,
+        patient_vital_vue_user_id,
+        doctor_employee_vital_vue_user_id,
+        scheduled_date
+)
+```
 
 ---
 
-# Slide 9: Math equation
+## Schedule Surgery - SQL Part 2
 
-$$
-\int_{a}^{b} x^2 dx
-$$
-
-This is an example of a math equation slide using LaTeX syntax.
-
----
-
-# Slide 10: Incremental Slide
-
-::: incremental
-
-- Item 1
-- Item 2
-- Item 3
-
-:::
-
----
-
-# Slide 11: Slide with a pause
-
-content before the pause
-
-. . .
-
-content after the pause
+```sql
+, new_nurses AS (
+    INSERT INTO nurse_role (
+        surgery_id,
+        nurse_employee_vital_vue_user_id,
+        role
+    )
+    SELECT
+        ns.id,
+        nurse_employee_vital_vue_user_id,
+        role
+    FROM 
+        new_surgery ns,
+        (VALUES {nurse_params}) AS nurse_role (
+            nurse_employee_vital_vue_user_id, 
+            role
+        )
+)
+```
 
 ---
 
-# Slide 12: Slide with notes and columns
+## Schedule Surgery - SQL Part 3
 
-::: notes
-
-This is my note.
-
-- It can contain Markdown
-- like this list
-
-:::
-
-:::::::::::::: {.columns}
-::: {.column width="40%"}
-foo | bar
---- | ---
-1   | 2
-3   | 4
-:::
-::: {.column width="60%"}
-foo | bar
---- | ---
-6   | -5
--4  | 13
-:::
-::::::::::::::
+```sql
+SELECT 
+    hospitalization_id,
+    id,
+    patient_vital_vue_user_id,
+    doctor_employee_vital_vue_user_id,
+    scheduled_date
+FROM
+    new_surgery;
+```
 
 ---
 
-# Slide 13: Conclusion
-- Summarize key points
-- Thank the audience for their time
+# Get Prescriptions.
+
+```sql
+SELECT 
+    p.id, 
+    p.validity_date,
+    mp.dose,
+    mp.frequency,
+    mp.medication_name
+FROM 
+    prescription AS p
+LEFT JOIN
+    med_posology AS mp
+ON
+    p.id = mp.prescription_id
+WHERE 
+    p.patient_vital_vue_user_id = %s;
+```
 
 ---
 
-# Thank you for your attention!
+# Add Prescriptions.
+
+```sql
+WITH new_prescription AS (
+    INSERT INTO prescription ({event_id_column}, validity_date)
+    VALUES (%s, %s)
+    RETURNING id
+), new_posology AS (
+    INSERT INTO med_posology (prescription_id, medication_name, dose, frequency)
+    SELECT np.id, mp.medication_name, mp.dose, mp.frequency
+    FROM new_prescription np,
+        (VALUES {med_pos_params}) AS mp (medication_name, dose, frequency)
+)
+SELECT id
+FROM new_prescription;
+```
+
+---
+
+# Execute Payment.
+
+---
+
+# List Top 3 patients.
+
+---
+
+# Daily Summary.
+
+```sql
+SELECT
+    SUM(payment.amount) AS "Amount Spent",
+    COUNT(surgery.id) AS "Surgeries",
+    COUNT(prescription.id) AS Prescriptions
+FROM hospitalization
+LEFT JOIN
+    hospitalization_bill ON hospitalization.id = hospitalization_bill.hospitalization_id
+LEFT JOIN
+    bill ON hospitalization_bill.bill_id = bill.id
+LEFT JOIN
+    payment ON bill.id = payment.bill_id
+LEFT JOIN
+    surgery ON hospitalization.id = surgery.hospitalization_id
+LEFT JOIN
+    prescription ON hospitalization.id = prescription.hospitalization_id
+WHERE
+    hospitalization.assistant_employee_vital_vue_user_id IN (SELECT employee_vital_vue_user_id FROM assistant)
+GROUP BY
+    date(scheduled_date);
+```
+
+---
+
+# Generate a monthly report.
+
+```sql
+SELECT
+    EXTRACT(MONTH FROM s.scheduled_date) AS Mês,
+    e.name as "Nome do Doctor",
+    COUNT(s.scheduled_date) as "Total de cirurgias"
+FROM
+    employee e
+JOIN
+    doctor d ON e.vital_vue_user_id = d.employee_vital_vue_user_id
+JOIN
+    surgery s ON d.employee_vital_vue_user_id = s.doctor_employee_vital_vue_user_id
+WHERE
+    s.scheduled_date >= DATE_TRUNC('month', NOW() - INTERVAL '12 months')
+GROUP BY
+    e.name, EXTRACT(MONTH FROM s.scheduled_date)
+ORDER BY
+    "Total de cirurgias" DESC;
+```
+
+---
+
+# Conclusion
+
+Thanks for your attention
