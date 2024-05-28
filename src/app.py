@@ -85,12 +85,11 @@ def hash_password(password):
     encoded = hashlib.md5(password_bytes)
     return encoded.hexdigest()
 
-################################################################################
-## LANDING PAGE
-################################################################################
-
 @app.route('/')
 def landing_page():
+    r'''
+    Landing page
+    '''
     return r"""<!DOCTYPE html>
 <html>
 <body>
@@ -106,17 +105,18 @@ def landing_page():
 </body>
 </html>"""
 
-################################################################################
-## REGISTER NEW INDIVIDUAL
-##
-## Registers a new individual taking the type into consideration
-##
-## How to use in curl:
-## > curl -X POST http://localhost:5433/register/patient - H 'Content-Type: application/json' - d ''
-################################################################################
-
 @app.route('/register/<registration_type>/', methods=['POST'])
 def register(registration_type: str):
+    r'''
+    Registers a new individual
+
+    Add Patient, Doctor, Nurse, and Assistant. Create a new individual,
+    inserting the data required by the data model. Take into consideration the
+    individual type and attributes to be consider. Do not forget that different
+    types of users have different attributes (e.g., doctors have specialties).
+    Avoid duplicated code. Remember that user details may contain sensitive
+    data.
+    '''
     endpoint = f'{request.method} {request.path}'
     logger.info(endpoint)
 
@@ -168,20 +168,19 @@ def register(registration_type: str):
 
     return jsonify(input_values)
 
-################################################################################
-## USER AUTHENTICATION
-##
-## Login using the username and password. In case of success, the returning
-## token will be included in the header of the remaining requests.
-##
-## How to use in curl:
-## > curl -X PUT http://localhost:8080/user -H 'Content-Type: application/json -d
-##   {"username": username, "password": password}
-################################################################################
-
 @app.route('/user/', methods=['PUT'])
 def user_authentication():
-    logger.info(f'PUT {request.path}')
+    r'''
+    User Authentication.
+
+    Login using the username and the password and receive an authentication
+    token (e.g., JSON Web Token (JWT), https://jwt.io/introduction ) in case of
+    success. This token should be included in the header of the remaining
+    requests.
+    '''
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get request payload
     payload = request.get_json()
@@ -229,7 +228,7 @@ def user_authentication():
                         'results': 'Invalid authentication credentials'}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'PUT {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value,
                     'error': str(error)}
 
@@ -239,16 +238,19 @@ def user_authentication():
 
     return jsonify(response)
 
-################################################################################
-## SCHEDULE APPOINTMENT
-## -- only patients
-## 
-################################################################################
-
 @app.route('/appointment/', methods=['POST'])
 @jwt_required()
 def schedule_appointment():
-    logger.info(f'POST {request.path}')
+    r'''
+    Schedule Appointment.
+
+    Create a new appointment, inserting the data required by the data model.
+    Only a patient can use this endpoint. Remember that for each new appointment
+    a bill should also be created using triggers.
+    '''
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -309,7 +311,7 @@ def schedule_appointment():
         conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
         conn.rollback()
@@ -320,16 +322,19 @@ def schedule_appointment():
 
     return jsonify(response)
 
-################################################################################
-## SEE APPOINTMENTS
-## -- only assistants and target patients
-## 
-################################################################################
-
 @app.route('/appointments/<patient_user_id>/', methods=['GET'])
 @jwt_required()
 def see_appointments(patient_user_id):
-    logger.info(f'GET {request.path}')
+    r'''
+    See Appointments.
+
+    List all appointments and respective details (e.g., doctor name) of a
+    specific patient Only assistants and the target patient can use this
+    endpoint.
+    '''
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -389,17 +394,23 @@ def see_appointments(patient_user_id):
 
     return jsonify(response)
 
-################################################################################
-## SCHEDULE SURGERY
-## -- only assistants
-## 
-################################################################################
-
 @app.route('/surgery/', defaults = {'hospitalization_id': None}, methods = ['POST'])
 @app.route('/surgery/<hospitalization_id>/', methods = ['POST'])
 @jwt_required()
 def schedule_surgery(hospitalization_id):
-    logger.info(f'{request.method} {request.path}')
+    r'''
+    Schedule Surgery.
+
+    Schedule a new surgery, inserting the data required by the data model. Only
+    assistants can use this endpoint. If hospitalization_id is provided,
+    associate with existing hospitalization, otherwise create a new
+    hospitalization. Remember that for each new appointment a bill should also
+    be created (or updated if the hospitalization already exists) using
+    triggers.
+    '''
+    
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -527,7 +538,7 @@ def schedule_surgery(hospitalization_id):
         conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
         conn.rollback()
@@ -538,16 +549,18 @@ def schedule_surgery(hospitalization_id):
 
     return jsonify(response)
 
-################################################################################
-## GET PRESCRIPTIONS
-## -- only employees and target patient
-## 
-################################################################################
-
 @app.route('/prescriptions/<person_id>/', methods = ['GET'])
 @jwt_required()
 def get_prescriptions(person_id):
-    logger.info(f'GET {request.path}')
+    r'''
+    Get Prescriptions.
+
+    Get the list of prescriptions and respective details for a patient. Only
+    employees or the targeted patient can use this endpoint.
+    '''
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -609,7 +622,7 @@ def get_prescriptions(person_id):
                     'results': results}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'GET {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
@@ -619,16 +632,18 @@ def get_prescriptions(person_id):
 
     return jsonify(response)
 
-################################################################################
-## ADD PRESCRIPTIONS
-## -- only doctors
-## 
-################################################################################
-
 @app.route('/prescription/', methods = ['POST'])
 @jwt_required()
 def add_prescription():
-    logger.info(f'POST {request.path}')
+    r'''
+    Add Prescriptions.
+
+    When an appointment or hospitalization takes place, a prescription might be
+    necessary. Only doctors can use this endpoint.
+    '''
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -743,7 +758,7 @@ def add_prescription():
         conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
         conn.rollback()
@@ -754,16 +769,19 @@ def add_prescription():
 
     return jsonify(response)
 
-################################################################################
-## EXECUTE PAYMENT
-## -- only the owning patient
-## 
-################################################################################
-
 @app.route('/bills/<bill_id>', methods = ['POST'])
 @jwt_required()
 def execute_payment(bill_id):
-    logger.info(f'POST {request.path}')
+    r'''
+    Execute Payment.
+
+    Pay existing bill. After payment is complete (one bill can have multiple
+    payments) the bill status is updated to "paid". Only the patient can pay
+    his/her own bills.
+    '''
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -783,7 +801,7 @@ def execute_payment(bill_id):
                     'results': results}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
@@ -793,16 +811,20 @@ def execute_payment(bill_id):
 
     return jsonify(response)
 
-################################################################################
-## LIST TOP 3 PATIENTS
-## -- only assistants
-## 
-################################################################################
-
 @app.route('/top3/', methods = ['GET'])
 @jwt_required()
 def list_top3_patients():
-    logger.info(f'GET {request.path}')
+    r'''
+    List Top 3 patients.
+
+    Get the top 3 patients considering the money spent in the Hospital for the
+    current month. The result should discriminate the respective procedures’
+    details. Just one SQL query should be used to obtain the information. Only
+    assistants can use this endpoint.
+    '''
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -822,7 +844,7 @@ def list_top3_patients():
                     'results': results}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'GET {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
@@ -842,6 +864,7 @@ def daily_summary(year_month_day: str):
     surgeries, payments, and prescriptions. Just one SQL query should be used to
     obtain the information. Only assistants can use this endpoint.
     '''
+
     endpoint = f'{request.method} {request.path}'
     logger.info(endpoint)
 
@@ -920,6 +943,7 @@ def generate_monthly_report():
     months. Just one SQL query should be used to obtain the information. Only
     assistants can use this endpoint.
     '''
+
     endpoint = f'{request.method} {request.path}'
     logger.info(endpoint)
 
