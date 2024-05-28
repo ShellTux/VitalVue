@@ -128,11 +128,11 @@ DECLARE
 BEGIN
     INSERT INTO bill (cost, paid)
     VALUES (NEW.cost, FALSE)
-	RETURNING bill_id INTO gen_bill_id;
+	RETURNING id INTO gen_bill_id;
 
 	UPDATE appointment
 	SET bill_id = gen_bill_id
-	WHERE appointment_id = NEW.appointment_id;
+	WHERE id = NEW.id;
 
 	NEW.bill_id = gen_bill_id;
 
@@ -144,16 +144,44 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION create_hospitalization_if_needed()
 RETURNS TRIGGER AS $$
 DECLARE
-    v_hospitalization_id integer;
+    gen_hospitalization_id BIGINT;
 BEGIN
     IF NEW.hospitalization_id IS NULL THEN
-        INSERT INTO hospitalization (patient_id)
+        INSERT INTO hospitalization (patient_vital_vue_user_id)
         VALUES (NEW.patient_vital_vue_user_id)
-        RETURNING hospitalization_id INTO v_hospitalization_id;
+        RETURNING id INTO gen_hospitalization_id;
         
-        NEW.hospitalization_id = v_hospitalization_id;
+        NEW.hospitalization_id = gen_hospitalization_id;
     END IF;
     
     RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Associate patient with prescription
+CREATE OR REPLACE FUNCTION associate_patient_with_prescription()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF NEW.appointment_id IS NOT NULL THEN
+		SELECT patient_vital_vue_user_id INTO NEW.patient_vital_vue_user_id
+        FROM appointment
+        WHERE id = NEW.appointment_id;
+	ELSIF NEW.hospitalization_id IS NOT NULL THEN
+		SELECT patient_vital_vue_user_id INTO NEW.patient_vital_vue_user_id
+        FROM hospitalization
+        WHERE id = NEW.hospitalization_id;
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create medicine after creating new med posology if medicine does not exist
+CREATE OR REPLACE FUNCTION create_medicine_if_needed()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF NOT EXISTS (SELECT name FROM medication WHERE name = NEW.medication_name) THEN
+		INSERT INTO medication (name) VALUES (NEW.medication_name);
+	END IF;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
