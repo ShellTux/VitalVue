@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "c8ff5f9a-49ea-4da7-98e0-ead0bfd17a4e",
-		"name": "VitalVue",
+		"_postman_id": "5d752b3d-f7ff-402f-9602-8c03c3b44ae5",
+		"name": "1. Vital Vue Register",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "34174553"
 	},
@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 123\r\n}",
+					"raw": "{\r\n    \"username\": \"mypatient\",\r\n    \"email\": \"mypatient@email.com\",\r\n    \"password\": \"123\",\r\n    \"name\": \"Marco Silva\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -42,7 +42,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 123\r\n}",
+					"raw": "{\r\n    \"username\": \"myassistant\",\r\n    \"email\": \"myassistant@mail.com\",\r\n    \"password\": \"123\",\r\n    \"contract_details\": \"the best assistant\",\r\n    \"name\": \"Alexandra\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -71,7 +71,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 123\r\n}",
+					"raw": "{\r\n    \"username\": \"mynurse\",\r\n    \"email\": \"mynurse@mail.com\",\r\n    \"password\": \"123\",\r\n    \"contract_details\": \"the best nurse\",\r\n    \"name\": \"Alexandra\",\r\n    \"category\": \"nurse category\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -100,7 +100,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 123\r\n}",
+					"raw": "{\r\n    \"username\": \"mydoctor\",\r\n    \"email\": \"mydoctor@mail.com\",\r\n    \"password\": \"123\",\r\n    \"contract_details\": \"the best doctor\",\r\n    \"name\": \"Marco Silva\",\r\n    \"license\": \"ortho\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -121,34 +121,28 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
 		},
 		{
-			"name": "Authenticate User",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"myusername\",\r\n    \"password\": \"mypassword\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/user",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"user"
-					]
-				}
-			},
-			"response": []
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }

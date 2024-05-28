@@ -1,151 +1,163 @@
-% Title of presentation
-% Speaker Name
-% Date of talk
+% VitalVue
+% João Alves, Luís Góis, Marco Silva
+% \today
 
 ---
 
-# Slide 1: Introduction
+# Slide 1: Objectives
 
-- This is the introduction slide
-- Use bullet points for listing key points
-
----
-
-# Slide 2: Main Points
-
-1. First main point
-2. Second main point
-3. Third main point
+- The key points of this project was to develop a Hospital Management System (HMS) 
+that will streamline hospital operations by managing patient care,
+scheduling, billing, and resource allocation.
 
 ---
 
-# Slide 3: Image
+# Slide 2: Technologies Used
 
-![Image Description](https://cdn.filestackcontent.com/Krg875TyRVwr5OOumHAG/convert?cache=true&crop=126%2C64%2C1187%2C593&crop_first=true&quality=90&w=1920)
+::: incremental
+
+1. Python - Backend development and general programming
+2. Flask - Web framework for building RESTful APIs
+3. PostgreSQL - Database management system
+4. Postman - API testing tool
+5. Docker - Containerization tool
+
+:::
 
 ---
 
-# Slide 4: Code Snippet
+# Slide 3: Project Arquitecture
+
+![Entity Relation Diagram](/assets/er-diagram.png)
+
+- This diagram shows the relationship between the different entities in the database. 
+Every relationship is represented by a line that connects the entitites and various modifiers that show the cardinality of the relationship.
+
+
+---
+
+# Slide 4: Implementation Example
 ```python
-# Function to greet a specific person
-def greet_person(name):
-    print("Hello, " + name + "!")
+@app.route('/user/', methods=['PUT'])
+def user_authentication():
+    # 1. get request payload
+    payload = request.get_json()
 
-# Function to calculate the square of a number
-def calculate_square(num):
-    return num ** 2
+    # 2. query statement and key values
+    statement = """
+                SELECT 
+                    u.id, 
+                    u.type
+                FROM 
+                    vital_vue_user AS u
+                WHERE 
+                    u.username = %s 
+                    AND u.password = %s;
+                """
+    key_values = ['username', 'password']
 
-# Main function to demonstrate the functions
-def main():
-    # Greet the user
-    greet_person("Alice")
+    # 3. validate payload
+    response = validate_payload(payload, key_values)
+    if response:
+        return jsonify(response)
 
-    # Calculate the square of a number
-    num = 5
-    result = calculate_square(num)
-    print("The square of", num, "is", result)
+    # 5. get input values from payload
+    payload['password'] = hash_password(payload['password'])
+    input_values = [payload[key] for key in key_values]
 
-    # Display a message
-    print("This is an enhanced and more complex code snippet!")
+    # 6. connect to database
+    conn = connect_db()
+    cursor = conn.cursor()
 
-# Call the main function
-main()
+    try:
+        cursor.execute(statement, input_values)
+        rows = cursor.fetchall()
+
+        if rows:
+            row = rows[0]
+            access_token = create_access_token(identity = row[0],
+                                               additional_claims = {
+                                                   'type': row[1]
+                                                   })
+            response = {'status': StatusCode.SUCCESS.value,
+                        'results': access_token}
+        else:
+            response = {'status': StatusCode.API_ERROR.value, 
+                        'results': 'Invalid authentication credentials'}
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'{endpoint} - error: {error}')
+        response = {'status': StatusCode.INTERNAL_ERROR.value,
+                    'error': str(error)}
+
+    finally:
+        if conn is not None:
+            conn.close()
+
+    return jsonify(response)
 ```
 
 ---
 
-# Slide 5: Tables
+# Slide 5: Uses of Postman
 
-| Name | Age | Location |
-|------|-----|----------|
-| Alice | 25  | New York |
-| Bob   | 30  | California |
+- Postman is a tool that allows us to test our APIs and see the responses that we get from them.
+by associating the endpoints with the methods we can test the different functionalities of the API.
 
----
+- For example, the same functions thar are signaled in the previous slide can be tested in Postman.
 
-# Slide 6: Quotes
-
-> "Be yourself; everyone else is already taken." - Oscar Wilde
-
----
-
-# Slide 7: Emphasis
-
-- *italic text*
-- **bold text**
-- ~~crossed text~~
-
----
-
-# Slide 8: Links
-[Click here to visit our website](https://example.com)
-
----
-
-# Slide 9: Math equation
-
-$$
-\int_{a}^{b} x^2 dx
-$$
-
-This is an example of a math equation slide using LaTeX syntax.
-
----
-
-# Slide 10: Incremental Slide
-
-::: incremental
-
-- Item 1
-- Item 2
-- Item 3
-
-:::
+```json
+"item": [
+		{
+			"name": "Register Patient",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 123\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/register/patient",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"register",
+						"patient"
+					]
+				}
+			},
+			"response": []
+		},
+]
+```
 
 ---
 
-# Slide 11: Slide with a pause
+# Slide 6: Results and benefits
 
-content before the pause
-
-. . .
-
-content after the pause
-
----
-
-# Slide 12: Slide with notes and columns
-
-::: notes
-
-This is my note.
-
-- It can contain Markdown
-- like this list
-
-:::
-
-:::::::::::::: {.columns}
-::: {.column width="40%"}
-foo | bar
---- | ---
-1   | 2
-3   | 4
-:::
-::: {.column width="60%"}
-foo | bar
---- | ---
-6   | -5
--4  | 13
-:::
-::::::::::::::
+- By using the technologies mentioned before we were able to develop a
+  functional Hospital Management System (HMS) that will streamline hospital
+  operations by managing patient care, scheduling, billing, and resource
+  allocation. Also, the use of Postman allowed us to test the different
+  functionalities of the API.
 
 ---
 
-# Slide 13: Conclusion
-- Summarize key points
-- Thank the audience for their time
+# Slide 7: Conclusion
+
+- In conclusion we were able to develop a functional Hospital Management System
+  (HMS) by using the technologies mentioned before. and following the directions
+  of the project.
 
 ---
 
-# Thank you for your attention!
+Thank you for your attention!

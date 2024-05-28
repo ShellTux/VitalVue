@@ -4,11 +4,10 @@ ARCHIVE             = BD-PL9-JoãoAlves-LuísGóis-MarcoSilva.zip
 FLASK_OPTS          = --app src/app.py --env-file .env
 ENV_FILE            = ./.env
 FLASK_RUN_OPTS      = --debug --host "$$SERVER_HOST" --port "$$SERVER_PORT" --with-threads
-INSTALLATION_MANUAL = installation-manual.pdf
 OPEN                = xdg-open
 PRESENTATION        = presentation.pdf
 REPORT              = relatorio.pdf
-USER_MANUAL         = user-manual.pdf
+PANDOC_DATA_DIR     = pandoc
 PANDOC_OPTS         = \
 		      --variable=theme:Warsaw \
 		      --highlight-style=assets/onehalfdark.theme
@@ -19,19 +18,25 @@ PIP        := ./$(VENV)/bin/pip
 PRE_COMMIT := ./$(VENV)/bin/pre-commit
 PYTHON     := ./$(VENV)/bin/python3
 
+ifneq ($(wildcard $(PANDOC_DATA_DIR)),)
+	PANDOC_OPTS += \
+		       $(foreach filter,\
+		       $(wildcard $(PANDOC_DATA_DIR)/filters/*.lua),\
+		       --lua-filter=$(filter))
+endif
+
 all: $(VENV) $(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL) $(PRESENTATION)
 
-$(REPORT) $(USER_MANUAL) $(INSTALLATION_MANUAL): %.pdf: docs/%.md
-	sed 's|/assets|assets|g' $< | pandoc --output=$@ --from=markdown
+$(REPORT): %.pdf: docs/%.md
+	pandoc $(PANDOC_OPTS) --from=markdown-implicit_figures --output=$@ $<
 
 $(PRESENTATION): %.pdf: docs/%.md
-	sed 's|/assets|assets|g' $< \
-		| pandoc $(PANDOC_OPTS) --output=$@ --from=markdown --to=beamer
+	pandoc $(PANDOC_OPTS) --to=beamer --output=$@ $<
 
 .PHONY: archive
 archive: $(ARCHIVE)
 
-$(ARCHIVE): $(REPORT) $(PRESENTATION) $(USER_MANUAL) $(INSTALLATION_MANUAL)
+$(ARCHIVE): $(REPORT) $(PRESENTATION)
 	git archive --output=$@ $(^:%=--add-file=%) HEAD
 
 $(VENV)/bin/activate: requirements.txt
@@ -61,7 +66,7 @@ flask: $(VENV)
 	(. $(ENV_FILE) && $(FLASK) $(FLASK_OPTS) run $(FLASK_RUN_OPTS))
 
 .PHONY: dev
-dev:
+dev: $(VENV)
 	sudo docker compose up --detach
 	sleep 3
 	(. $(ENV_FILE) && $(OPEN) "http://$$SERVER_HOST:$$PGADMIN_DEFAULT_PORT")

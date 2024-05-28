@@ -1,2 +1,0 @@
-CREATE DATABASE testdb1;
-CREATE DATABASE testdb2;
