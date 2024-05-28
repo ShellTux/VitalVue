@@ -20,9 +20,13 @@ date: \today
 With the collections imported you can run them seperately in order or out of order. This is the recommended order:
 
 1. Vital Vue Register
+- Registers one user of each type.
 2. Vital Vue Appointments
+- Schedules an appointments and sees the appointments for a patient.
 3. Vital Vue Surgeries
+- Schedules a surgery for a patient.
 4. Vital Vue Prescriptions
+- Adds prescriptions and gets the prescriptions for a patient.
 5. Vital Vue Stats
 
 You can run the collection by `right clicking` on them and selecting `Run collection`. It's recommended to tick `Persist responses for a session`, so that you can see the responses for each request.
