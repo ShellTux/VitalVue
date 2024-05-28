@@ -25,11 +25,11 @@ With the collections imported you can run them seperately in order or out of ord
 4. Vital Vue Prescriptions
 5. Vital Vue Stats
 
-You can run the collection by `right clicking` on them and selecting `Run collection`.
-> [!NOTE]
-> It's recommended to tick `Persist responses for a session`, so that you can see the responses for each request.
+You can run the collection by `right clicking` on them and selecting `Run collection`. It's recommended to tick `Persist responses for a session`, so that you can see the responses for each request.
 
 ## Requests
+
+There is also the option to create new requests if needed. This is how each of them can be implemented.
 
 ### Register Patient
 
