@@ -178,7 +178,9 @@ def user_authentication():
     success. This token should be included in the header of the remaining
     requests.
     '''
-    logger.info(f'PUT {request.path}')
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get request payload
     payload = request.get_json()
@@ -226,7 +228,7 @@ def user_authentication():
                         'results': 'Invalid authentication credentials'}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'PUT {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value,
                     'error': str(error)}
 
@@ -246,7 +248,9 @@ def schedule_appointment():
     Only a patient can use this endpoint. Remember that for each new appointment
     a bill should also be created using triggers.
     '''
-    logger.info(f'POST {request.path}')
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -307,7 +311,7 @@ def schedule_appointment():
         conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
         conn.rollback()
@@ -328,7 +332,9 @@ def see_appointments(patient_user_id):
     specific patient Only assistants and the target patient can use this
     endpoint.
     '''
-    logger.info(f'GET {request.path}')
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -402,7 +408,9 @@ def schedule_surgery(hospitalization_id):
     be created (or updated if the hospitalization already exists) using
     triggers.
     '''
-    logger.info(f'{request.method} {request.path}')
+    
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -530,7 +538,7 @@ def schedule_surgery(hospitalization_id):
         conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
         conn.rollback()
@@ -550,7 +558,9 @@ def get_prescriptions(person_id):
     Get the list of prescriptions and respective details for a patient. Only
     employees or the targeted patient can use this endpoint.
     '''
-    logger.info(f'GET {request.path}')
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -612,7 +622,7 @@ def get_prescriptions(person_id):
                     'results': results}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'GET {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
@@ -631,7 +641,9 @@ def add_prescription():
     When an appointment or hospitalization takes place, a prescription might be
     necessary. Only doctors can use this endpoint.
     '''
-    logger.info(f'POST {request.path}')
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     # 1. get token data
     id = get_jwt_identity()
@@ -746,7 +758,7 @@ def add_prescription():
         conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
         conn.rollback()
@@ -767,7 +779,9 @@ def execute_payment(bill_id):
     payments) the bill status is updated to "paid". Only the patient can pay
     his/her own bills.
     '''
-    logger.info(f'POST {request.path}')
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -787,7 +801,7 @@ def execute_payment(bill_id):
                     'results': results}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'POST {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
@@ -808,7 +822,9 @@ def list_top3_patients():
     details. Just one SQL query should be used to obtain the information. Only
     assistants can use this endpoint.
     '''
-    logger.info(f'GET {request.path}')
+
+    endpoint = f'{request.method} {request.path}'
+    logger.info(endpoint)
 
     token = get_jwt()
     identity = get_jwt_identity()
@@ -828,7 +844,7 @@ def list_top3_patients():
                     'results': results}
 
     except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f'GET {request.path} - error: {error}')
+        logger.error(f'{endpoint} - error: {error}')
         response = {'status': StatusCode.INTERNAL_ERROR.value, 
                     'errors': str(error)}
 
@@ -848,6 +864,7 @@ def daily_summary(year_month_day: str):
     surgeries, payments, and prescriptions. Just one SQL query should be used to
     obtain the information. Only assistants can use this endpoint.
     '''
+
     endpoint = f'{request.method} {request.path}'
     logger.info(endpoint)
 
@@ -926,6 +943,7 @@ def generate_monthly_report():
     months. Just one SQL query should be used to obtain the information. Only
     assistants can use this endpoint.
     '''
+
     endpoint = f'{request.method} {request.path}'
     logger.info(endpoint)
 
