@@ -407,6 +407,19 @@ Responds with the status code and the montly report.
 }
 ```
 
+## Contribution
+
+1. Marco Manuel Almeida e Silva (42h)
+  - Sql Queries
+  - Python Code
+  - Postman Collections
+2. Luís Pedro de Sousa Oliveira Góis (38h)
+  - Sql Queries
+  - Python Code
+  - Environment/Stack Setup (Docker, ...)
+3. João Vítor Fraga Maia Alves (5h30m)
+  - Presentation
+
 ## Attachments
 
 The onda project saved as json are saved under the assets directory, among all
