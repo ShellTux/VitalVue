@@ -10,18 +10,6 @@
 
 ---
 
-# Conceptual Diagram
-
-![Conceptual Diagram](/assets/conceptual-diagram.png)
-
----
-
-# Physical Diagram
-
-![Physical Diagram](/assets/physical-diagram.png)
-
----
-
 # Postgres Setup
 
 db-config:
