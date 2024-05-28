@@ -48,12 +48,9 @@ CONFIG = dotenv_values('.env')
 
 # setup flask app
 app = Flask(__name__)
-# TODO: Create config setting for secret key
-app.config['SECRET_KEY'] = 'secret_key'
 
 # setup Flask-JWT-Extended extension
-# TODO: Create config setting for jwt secret key
-app.config['JWT_SECRET_KEY'] = 'secret_key'
+app.config['JWT_SECRET_KEY'] = CONFIG.get('SECRET_KEY')
 jwt = JWTManager(app)
 
 fileConfig('logging_config.ini')
