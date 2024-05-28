@@ -1,0 +1,155 @@
+{
+	"info": {
+		"_postman_id": "cc56d956-da36-4cbd-9e0e-8bfc20d597b2",
+		"name": "4. Vital Vue Prescriptions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34174553"
+	},
+	"item": [
+		{
+			"name": "Authenticate Doctor",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the JSON response\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"// Extract the token from the 'results' field\r",
+							"const authToken = jsonData.results;\r",
+							"\r",
+							"// Set the auth token as a collection variable\r",
+							"pm.collectionVariables.set(\"Auth Token\", authToken);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"mydoctor\",\r\n    \"password\": \"123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Prescription",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Auth Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": \"appointment\",\r\n    \"event_id\": 1,\r\n    \"validity\": \"2024-05-27\",\r\n    \"medicines\": [\r\n        {\"medicine\": \"ben-u-ron\", \"posology_dose\": 100, \"posology_frequency\": 2},\r\n        {\"medicine\": \"aspirin\", \"posology_dose\": 100, \"posology_frequency\": 2}\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/prescription/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"prescription",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Prescriptions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Auth Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/prescriptions/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"prescriptions",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "Auth Token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

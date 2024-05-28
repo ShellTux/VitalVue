@@ -67,8 +67,8 @@ CREATE TABLE prescription (
 	id			 BIGSERIAL,
 	validity_date		 DATE NOT NULL,
 	patient_vital_vue_user_id BIGINT NOT NULL,
-	hospitalization_id	 BIGINT NOT NULL,
-	appointment_id		 BIGINT NOT NULL,
+	hospitalization_id	 BIGINT,
+	appointment_id		 BIGINT,
 	PRIMARY KEY(id)
 );
 

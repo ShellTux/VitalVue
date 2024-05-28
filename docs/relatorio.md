@@ -388,6 +388,25 @@ Responds with the status code and the information about the patient prescription
 
 Responds with the status code and the prescription ID.
 
+#### Generate Monthly Report
+
+Responds with the status code and the montly report.
+
+##### Response Example
+
+```json
+{
+    "results": [
+        {
+            "doctor": "Marco Silva",
+            "month": "5",
+            "surgeries": 4
+        }
+    ],
+    "status": 200
+}
+```
+
 ## Attachments
 
 The onda project saved as json are saved under the assets directory, among all
